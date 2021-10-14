@@ -1,5 +1,5 @@
 """
-WSGI config for blueteam project.
+WSGI config for discordsync project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'blueteam.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'discordsync.settings')
 
 application = get_wsgi_application()

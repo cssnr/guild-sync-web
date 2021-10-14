@@ -1,8 +1,8 @@
 import os
 from distutils.util import strtobool
 
-ROOT_URLCONF = 'blueteam.urls'
-WSGI_APPLICATION = 'blueteam.wsgi.application'
+ROOT_URLCONF = 'discordsync.urls'
+WSGI_APPLICATION = 'discordsync.wsgi.application'
 
 AUTH_USER_MODEL = 'oauth.CustomUser'
 

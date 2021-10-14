@@ -28,7 +28,7 @@ services:
     build: ./app
     image: harbor01.cssnr.com/shane/discord-sync-docker-app:${VERSION}
     env_file: ${ENV_FILE}
-    command: "gunicorn blueteam.wsgi:application -w 2 -b 0.0.0.0:9000"
+    command: "gunicorn discordsync.wsgi:application -w 2 -b 0.0.0.0:9000"
     deploy:
       mode: global
     volumes:
@@ -39,7 +39,7 @@ services:
   worker:
     image: harbor01.cssnr.com/shane/discord-sync-docker-app:${VERSION}
     env_file: ${ENV_FILE}
-    command: "celery -A blueteam worker -l INFO -c 2"
+    command: "celery -A discordsync worker -l INFO -c 2"
     deploy:
       replicas: 1
     depends_on:
@@ -49,7 +49,7 @@ services:
   beat:
     image: harbor01.cssnr.com/shane/discord-sync-docker-app:${VERSION}
     env_file: ${ENV_FILE}
-    command: "celery -A blueteam beat -l INFO -s /celerybeat-schedule"
+    command: "celery -A discordsync beat -l INFO -s /celerybeat-schedule"
     deploy:
       replicas: 1
     depends_on:
