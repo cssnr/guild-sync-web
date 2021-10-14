@@ -1,0 +1,16 @@
+{% extends "main.html" %}
+{% block home_active %}active{% endblock %}
+{% block title %}Home{% endblock %}
+{% load home_tags %}
+
+{% block head %}{% endblock %}
+
+{% block body %}
+
+        {% if user.is_authenticated and user.blue_team_member %}
+            {% include 'home/blue.html' %}
+        {% else %}
+            {% include 'home/public.html' %}
+        {% endif %}
+
+{% endblock %}

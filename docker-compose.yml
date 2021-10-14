@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  nginx:
+    build: ./nginx
+    image: discord-sync-docker-nginx:latest
+    env_file: settings.env
+    deploy:
+      mode: global
+    volumes:
+      - data_dir:/data
+    depends_on:
+      - app
+    secrets:
+      - source: cssnr.com.crt
+        target: /etc/ssl/cssnr.com.crt
+      - source: cssnr.com.key
+        target: /etc/ssl/cssnr.com.key
+      - source: blueteam_basic_http_auth
+        target: /etc/nginx/auth.users
+    ports:
+      - "443:443"
+    links:
+      - "app"
+      - "flower"
+
+  app:
+    build: ./app
+    image: discord-sync-docker-app:latest
+    env_file: settings.env
+    command: "gunicorn blueteam.wsgi:application -w 2 -b 0.0.0.0:9000"
+    deploy:
+      mode: global
+    volumes:
+      - data_dir:/data
+    depends_on:
+      - redis
+
+  worker:
+    image: discord-sync-docker-app:latest
+    env_file: settings.env
+    command: "celery -A blueteam worker -l INFO -c 2"
+    deploy:
+      replicas: 1
+    depends_on:
+      - app
+      - redis
+
+  beat:
+    image: discord-sync-docker-app:latest
+    env_file: settings.env
+    command: "celery -A blueteam beat -l INFO -s /celerybeat-schedule"
+    deploy:
+      replicas: 1
+    depends_on:
+      - app
+      - redis
+
+  redis:
+    image: redis:6-alpine
+    deploy:
+      replicas: 1
+    volumes:
+      - redis_data:/data
+
+  flower:
+    image: mher/flower
+    env_file: settings.env
+    deploy:
+      replicas: 1
+    volumes:
+      - flower_data:/data
+
+secrets:
+  cssnr.com.crt:
+    file: /etc/ssl/cssnr.com.crt
+  cssnr.com.key:
+    file: /etc/ssl/cssnr.com.key
+  blueteam_basic_http_auth:
+    file: ~/basic_http_auth
+
+volumes:
+  data_dir:
+  redis_data:
+  flower_data:

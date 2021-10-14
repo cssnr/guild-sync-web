@@ -1,0 +1,125 @@
+{% load static %}
+{% load home_tags %}
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    {% get_config "DEBUG" as debug_enabled %}
+    {% if debug_enabled %}<meta name="robots" content="noindex, nofollow">{% endif %}
+
+    <meta name="author" content="Shane"/>
+    <meta name="title" content="Blue Team Website"/>
+    <meta name="description" content="Blue Team - A Classic World of Warcraft raiding guild from US Faerlina."/>
+
+    <meta property="og:author" content="Shane">
+    <meta property="og:title" content="Blue Team Website">
+    <meta property="og:description" content="Blue Team - A Classic World of Warcraft raiding guild from US Faerlina.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.scheme }}://{{ request.META.HTTP_HOST }}{% url 'home:index' %}">
+    <meta property="og:image" content="{{ request.scheme }}://{{ request.META.HTTP_HOST }}{% static 'images/logo.png' %}">
+    <meta property="og:image:type" content="image/png">
+
+    <title>Blue Team - {% block title %}{% endblock %}</title>
+
+    <link rel="icon" href="{% static 'images/favicon.ico' %}">
+
+    <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'font-awesome/css/all.min.css' %}" rel="stylesheet">
+    <link href="{% static 'main/css/main.css' %}" rel="stylesheet">
+
+    {% block head %}{% endblock %}
+</head>
+<body>
+
+<div class="container-fluid">
+    {% block heading %}
+        <nav class="navbar navbar-expand-md navbar-dark bg-dark mt-2">
+            <a class="navbar-brand" href="{% url 'home:index' %}">{{ site_title_short }}</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor02"
+                    aria-controls="navbarColor02" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarColor02">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item {% block home_active %}{% endblock %}">
+                        <a class="nav-link" href="{% url 'home:index' %}">Home</a>
+                    </li>
+                    <li class="nav-item {% block news_active %}{% endblock %}">
+                        <a class="nav-link" href="{% url 'home:news' %}">News</a>
+                    </li>
+                    <li class="nav-item {% block roster_active %}{% endblock %}">
+                        <a class="nav-link" href="{% url 'home:roster' %}">Roster</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown"
+                           role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Resources</a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="https://github.com/blue-team-wow/addons-classic" target="_blank">
+                                Classic WoW Addons</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="{% get_config "BLUE_DISCORD_URL" %}">Join our Discord</a>
+                        </div>
+                    </li>
+                    {% if not request.user.blue_team_member %}
+                        <li class="nav-item {% block apply_active %}{% endblock %}">
+                            <a class="nav-link" href="{% url 'home:apply' %}">Apply to Blue</a>
+                        </li>
+                    {% endif %}
+                </ul>
+
+                {% if not request.user.is_authenticated %}
+                    {# Not Authenticated #}
+                    <a href="{% url 'oauth:login' %}?next={{ request.path }}" class="btn btn-outline-info" role="button">
+                        Log in with Discord
+                        <i class="fas fa-sign-in-alt"></i></a>
+
+                {% else %}
+                    {# Logged In #}
+                    {% if user.blue_team_member %}
+                        <a href="{% url 'home:profile' %}" class="text-info mr-3">
+                            {% if user.first_name %}{{ user.first_name }}{% else %}{{ user.username }}{% endif %}</a>
+                    {% else %}
+                        <a href="https://discord.com/login" class="text-info mr-3" target="_blank">
+                            {% if user.first_name %}{{ user.first_name }}{% else %}{{ user.username }}{% endif %}</a>
+                    {% endif %}
+                    {% if user.is_superuser %}
+                        <a href="{% url 'flower' %}" class="btn btn-outline-success mr-1" role="button" target="_blank">
+                            Flower <i class="fas fa-fan"></i></a>
+                    {% endif %}
+                    {% if user.is_staff %}
+                        <a href="{% url 'admin:index' %}" class="btn btn-outline-primary mr-1" role="button">
+                            Admin <i class="fas fa-rocket"></i></a>
+                    {% endif %}
+                    <a href="" class="log-out btn btn-outline-info" role="button">
+                        Log Out <i class="fas fa-sign-out-alt"></i></a>
+                {% endif %}
+
+            </div>
+        </nav>
+    {% endblock %}
+
+    {% block body %}{% endblock %}
+
+    {% block footer %}{% endblock %}
+</div>
+
+{% if request.user.is_authenticated %}
+    <form id="log-out" action="{% url 'oauth:logout' %}" method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+    </form>
+{% endif %}
+
+<script type="text/javascript" src="{% static 'jquery/jquery.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'popper/popper.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'font-awesome/js/all.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'main/js/main.js' %}"></script>
+
+{% block tail %}{% endblock %}
+
+</body>
+</html>
