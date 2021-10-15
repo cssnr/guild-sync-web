@@ -10,18 +10,17 @@
     {% if debug_enabled %}<meta name="robots" content="noindex, nofollow">{% endif %}
 
     <meta name="author" content="Shane"/>
-    <meta name="title" content="Blue Team Website"/>
-    <meta name="description" content="Blue Team - A Classic World of Warcraft raiding guild from US Faerlina."/>
+    <meta name="title" content="Discord Guild Sync"/>
+    <meta name="description" content="Discord Guild Sync - A Discord Guild Sync for World of Warcraft Classic."/>
 
     <meta property="og:author" content="Shane">
-    <meta property="og:title" content="Blue Team Website">
-    <meta property="og:description" content="Blue Team - A Classic World of Warcraft raiding guild from US Faerlina.">
+    <meta property="og:title" content="Discord Guild Sync">
+    <meta property="og:description" content="Discord Guild Sync - A Discord Guild Sync for World of Warcraft Classic.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ request.scheme }}://{{ request.META.HTTP_HOST }}{% url 'home:index' %}">
     <meta property="og:image" content="{{ request.scheme }}://{{ request.META.HTTP_HOST }}{% static 'images/logo.png' %}">
-    <meta property="og:image:type" content="image/png">
 
-    <title>Blue Team - {% block title %}{% endblock %}</title>
+    <title>Discord Guild Sync - {% block title %}{% endblock %}</title>
 
     <link rel="icon" href="{% static 'images/favicon.ico' %}">
 
@@ -37,11 +36,11 @@
     {% block heading %}
         <nav class="navbar navbar-expand-md navbar-dark bg-dark mt-2">
             <a class="navbar-brand" href="{% url 'home:index' %}">{{ site_title_short }}</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor02"
-                    aria-controls="navbarColor02" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor"
+                    aria-controls="navbarColor" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarColor02">
+            <div class="collapse navbar-collapse" id="navbarColor">
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item {% block home_active %}{% endblock %}">
                         <a class="nav-link" href="{% url 'home:index' %}">Home</a>
@@ -54,10 +53,11 @@
                            role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Resources</a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="https://github.com/blue-team-wow/addons-classic" target="_blank">
-                                Classic WoW Addons</a>
+                            <a class="dropdown-item" href="https://discord.com/developers/applications" target="_blank">
+                                Discord Developer Portal</a>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="{% get_config "DISCORD_URL" %}">Join our Discord</a>
+                            <a class="dropdown-item" href="{% get_config "DISCORD_URL" %}" target="_blank">
+                                Join our Discord</a>
                         </div>
                     </li>
                 </ul>

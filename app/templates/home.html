@@ -9,13 +9,13 @@
     <div class="row mt-2">
 
         <div class="col">
-            <h1>Blue Team</h1>
+            <h1>Discord Guild Sync</h1>
 
             {% if user.is_authenticated %}
                 <p class="lead">Hello {% if user.first_name %}{{ user.first_name }}{% else %}{{ user.username }}{% endif %}
-                    and welcome.</p>
+                    and welcome to the Discord Guild Sync website.</p>
             {% else %}
-                <p class="lead">Hello and welcome.</p>
+                <p class="lead">Hello and welcome to the Discord Guild Sync website.</p>
             {% endif %}
 
             <p>For more information <a class="text-info" href="{% get_config "DISCORD_URL" %}">
