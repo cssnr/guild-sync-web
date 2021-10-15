@@ -159,7 +159,7 @@ def update_profile(user, user_profile):
 
     user.first_name = user_profile['username']
     user.last_name = user_profile['discriminator']
-    user.discord_username = user_profile['discord_nick']
+    user.discord_username = user_profile['username']
     user.discriminator = user_profile['discriminator']
     user.discord_id = user_profile['id']
     user.avatar_hash = user_profile['avatar']
