@@ -37,7 +37,7 @@ def profile_view(request):
         #     server_id=request.user.discord_id
         # ).first()
         server_profile = {}
-        blue_profile = {} if not server_profile else server_profile
+        server_profile = {} if not server_profile else server_profile
         data = {'blue_profile': server_profile}
         return render(request, 'profile.html', data)
 
