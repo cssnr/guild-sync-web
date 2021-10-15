@@ -1,19 +1,17 @@
 from django.db import models
-from .managers import BlueProfileManager
+from .managers import BlueServerManager
 
 
-class BlueProfile(models.Model):
-    discord_id = models.CharField(primary_key=True, max_length=32, verbose_name='Discord ID')
-    main_char = models.CharField(unique=True, max_length=32, verbose_name='Main Character')
-    main_class = models.CharField(max_length=32, verbose_name='Main Class')
-    main_role = models.CharField(max_length=32, verbose_name='Main Role')
-    user_description = models.TextField(blank=True, verbose_name='User Description')
-    show_in_roster = models.BooleanField(default=True, verbose_name='Show in Roster')
-    twitch_username = models.CharField(blank=True, max_length=32, verbose_name='Twitch Username')
-    live_on_twitch = models.BooleanField(default=False, verbose_name='Twitch Live Status')
+class ServerProfile(models.Model):
+    server_id = models.CharField(primary_key=True, max_length=32, verbose_name='Discord Server ID')
+    server_name = models.CharField(blank=True, max_length=32, verbose_name='Discord Server Name')
+    guild_name = models.CharField(blank=True, max_length=64, verbose_name='WoW Guild Name')
+    alert_channel = models.CharField(blank=True, max_length=64, verbose_name='Discord Alerts Channel')
+    server_notes = models.TextField(blank=True, verbose_name='Server Notes')
+    is_enabled = models.BooleanField(default=False, verbose_name='Server Enable Status')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    objects = BlueProfileManager()
+    objects = BlueServerManager()
 
     def __str__(self):
         return '{} - {}'.format(self.main_char, self.main_class)
@@ -21,12 +19,3 @@ class BlueProfile(models.Model):
     class Meta:
         verbose_name = 'Blue Profile'
         verbose_name_plural = 'Blue Profiles'
-
-
-class TwitchToken(models.Model):
-    id = models.AutoField(primary_key=True)
-    access_token = models.CharField(blank=True, max_length=32)
-    expiration_date = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.access_token

@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import JsonResponse
 from django.shortcuts import render
 from .forms import ProfileForm
-from .models import BlueProfile
+from .models import ServerProfile
 
 logger = logging.getLogger('app')
 
@@ -33,11 +33,11 @@ def news_view(request):
 def profile_view(request):
     # View: /profile/
     if not request.method == 'POST':
-        blue_profile = BlueProfile.objects.filter(
+        server_profile = ServerProfile.objects.filter(
             discord_id=request.user.discord_id
         ).first()
-        blue_profile = {} if not blue_profile else blue_profile
-        data = {'blue_profile': blue_profile}
+        blue_profile = {} if not server_profile else server_profile
+        data = {'blue_profile': server_profile}
         return render(request, 'profile.html', data)
 
     else:
@@ -45,7 +45,8 @@ def profile_view(request):
             logger.debug(request.POST)
             form = ProfileForm(request.POST)
             if form.is_valid():
-                blue_profile, created = BlueProfile.objects.get_or_create(
+                raise Exception('WIP')
+                blue_profile, created = ServerProfile.objects.get_or_create(
                     discord_id=request.user.discord_id)
                 blue_profile.main_char = form.cleaned_data['main_char']
                 blue_profile.main_class = form.cleaned_data['main_class']
