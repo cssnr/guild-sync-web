@@ -24,6 +24,7 @@ class BlueProfile(models.Model):
 
 
 class TwitchToken(models.Model):
+    id = models.AutoField(primary_key=True)
     access_token = models.CharField(blank=True, max_length=32)
     expiration_date = models.DateTimeField(auto_now_add=True)
 

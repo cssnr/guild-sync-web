@@ -3,6 +3,7 @@ from django.db import models
 
 
 class CustomUser(AbstractUser):
+    id = models.AutoField(primary_key=True)
     discord_username = models.CharField(blank=True, max_length=32)
     discriminator = models.CharField(blank=True, max_length=4)
     discord_id = models.CharField(blank=True, max_length=32)
