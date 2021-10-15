@@ -16,7 +16,7 @@ services:
         target: /etc/ssl/cssnr.com.crt
       - source: cssnr.com.key
         target: /etc/ssl/cssnr.com.key
-      - source: blueteam_basic_http_auth
+      - source: cssnr_basic_http_auth
         target: /etc/nginx/auth.users
     ports:
       - "443:443"
@@ -76,7 +76,7 @@ secrets:
     file: /etc/ssl/cssnr.com.crt
   cssnr.com.key:
     file: /etc/ssl/cssnr.com.key
-  blueteam_basic_http_auth:
+  cssnr_basic_http_auth:
     file: ~/basic_http_auth
 
 volumes:
