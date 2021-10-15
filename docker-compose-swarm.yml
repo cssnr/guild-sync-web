@@ -3,7 +3,7 @@ version: '3.8'
 services:
   nginx:
     build: ./nginx
-    image: harbor01.cssnr.com/shane/discord-sync-docker-nginx:${VERSION}
+    image: harbor.hosted-domains.com/shane/discord-sync-docker-nginx:${VERSION}
     env_file: ${ENV_FILE}
     deploy:
       mode: global
@@ -26,7 +26,7 @@ services:
 
   app:
     build: ./app
-    image: harbor01.cssnr.com/shane/discord-sync-docker-app:${VERSION}
+    image: harbor.hosted-domains.com/shane/discord-sync-docker-app:${VERSION}
     env_file: ${ENV_FILE}
     command: "gunicorn discordsync.wsgi:application -w 2 -b 0.0.0.0:9000"
     deploy:
@@ -37,7 +37,7 @@ services:
       - redis
 
   worker:
-    image: harbor01.cssnr.com/shane/discord-sync-docker-app:${VERSION}
+    image: harbor.hosted-domains.com/shane/discord-sync-docker-app:${VERSION}
     env_file: ${ENV_FILE}
     command: "celery -A discordsync worker -l INFO -c 2"
     deploy:
@@ -47,7 +47,7 @@ services:
       - redis
 
   beat:
-    image: harbor01.cssnr.com/shane/discord-sync-docker-app:${VERSION}
+    image: harbor.hosted-domains.com/shane/discord-sync-docker-app:${VERSION}
     env_file: ${ENV_FILE}
     command: "celery -A discordsync beat -l INFO -s /celerybeat-schedule"
     deploy:
