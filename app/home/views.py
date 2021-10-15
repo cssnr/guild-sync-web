@@ -33,9 +33,10 @@ def news_view(request):
 def profile_view(request):
     # View: /profile/
     if not request.method == 'POST':
-        server_profile = ServerProfile.objects.filter(
-            discord_id=request.user.discord_id
-        ).first()
+        # server_profile = ServerProfile.objects.filter(
+        #     server_id=request.user.discord_id
+        # ).first()
+        server_profile = {}
         blue_profile = {} if not server_profile else server_profile
         data = {'blue_profile': server_profile}
         return render(request, 'profile.html', data)
