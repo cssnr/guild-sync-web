@@ -123,18 +123,18 @@ def get_user_profile(access_token):
     logger.debug('content: %s', r.content)
     user_profile = r.json()
 
-    url = '{}/guilds/{}/members/{}'.format(
-        settings.DISCORD_API_ENDPOINT,
-        settings.BLUE_DISCORD_ID,
-        user_profile['id'],
-    )
-    headers = {
-        'Authorization': 'Bot {}'.format(settings.BLUE_DISCORD_BOT_TOKEN),
-    }
-    r = requests.get(url, headers=headers, timeout=10)
-    logger.debug('status_code: %s', r.status_code)
-    logger.debug('content: %s', r.content)
-    user_guild = r.json()
+    # url = '{}/guilds/{}/members/{}'.format(
+    #     settings.DISCORD_API_ENDPOINT,
+    #     settings.BLUE_DISCORD_ID,
+    #     user_profile['id'],
+    # )
+    # headers = {
+    #     'Authorization': 'Bot {}'.format(settings.BLUE_DISCORD_BOT_TOKEN),
+    # }
+    # r = requests.get(url, headers=headers, timeout=10)
+    # logger.debug('status_code: %s', r.status_code)
+    # logger.debug('content: %s', r.content)
+    # user_guild = r.json()
 
     return {
         'id': user_profile['id'],
@@ -142,10 +142,6 @@ def get_user_profile(access_token):
         'discriminator': user_profile['discriminator'],
         'django_username': user_profile['username'] + user_profile['discriminator'],
         'avatar': user_profile['avatar'],
-        'blue_team_member': settings.BLUE_DISCORD_BLUE_ROLE in user_guild['roles'],
-        'blue_team_officer': settings.BLUE_DISCORD_OFFICER_ROLE in user_guild['roles'],
-        'discord_roles': user_guild['roles'],
-        'discord_nick': user_guild['nick'] or user_profile['username'],
     }
 
 
@@ -153,7 +149,6 @@ def update_profile(user, user_profile):
     """
     Update Django user profile with provided data
     """
-    blue = user_profile['blue_team_member'] or user_profile['blue_team_officer']
 
     officers = Group.objects.get(name='Officers')
     logger.debug('blue_team_officer: %s', user_profile['blue_team_officer'])
@@ -168,10 +163,6 @@ def update_profile(user, user_profile):
     user.discriminator = user_profile['discriminator']
     user.discord_id = user_profile['id']
     user.avatar_hash = user_profile['avatar']
-    user.blue_team_member = blue
-    user.blue_team_officer = user_profile['blue_team_officer']
-    user.discord_roles = user_profile['discord_roles']
-    user.is_staff = user_profile['blue_team_officer']
     return user
 
 
