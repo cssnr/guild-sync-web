@@ -82,7 +82,7 @@ def send_discord_message(channel_id, message):
         channel_id,
     )
     headers = {
-        'Authorization': 'Bot {}'.format(settings.BLUE_DISCORD_BOT_TOKEN),
+        'Authorization': 'Bot {}'.format(settings.ISCORD_BOT_TOKEN),
     }
     data = {'content': message}
     r = requests.post(url, headers=headers, data=data, timeout=10)
