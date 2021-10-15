@@ -7,8 +7,3 @@ class BlueProfileManager(models.Manager):
 
     def get_live(self):
         return self.filter(live_on_twitch=True)
-
-
-class BlueNewsManager(models.Manager):
-    def get_active(self):
-        return self.filter(published=True)

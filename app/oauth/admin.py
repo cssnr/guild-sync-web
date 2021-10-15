@@ -8,10 +8,9 @@ class CustomUserAdmin(UserAdmin):
     list_display = ('username', 'first_name', 'discriminator', 'discord_id', 'is_staff',)
     list_filter = ('is_staff',)
     fieldsets = UserAdmin.fieldsets + (
-        ('OAuth', {'fields': ('discord_username', 'discriminator', 'discord_id', 'discord_roles',
-                              'blue_team_member', 'blue_team_officer',)}),
+        ('OAuth', {'fields': ('discord_username', 'discriminator', 'discord_id',)}),
     )
-    readonly_fields = ('discord_username', 'discriminator', 'discord_id', 'discord_roles',)
+    readonly_fields = ('discord_username', 'discriminator', 'discord_id',)
     search_fields = ('username', 'discord_id',)
     ordering = ('username',)
 

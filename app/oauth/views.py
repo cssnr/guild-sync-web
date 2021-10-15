@@ -2,7 +2,7 @@ import logging
 import requests
 import urllib.parse
 from django.contrib.auth import login, logout
-from django.contrib.auth.models import Group
+# from django.contrib.auth.models import Group
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import redirect
 from django.shortcuts import HttpResponseRedirect, HttpResponse

@@ -4,20 +4,20 @@ import requests
 from celery.decorators import task
 from django.conf import settings
 from django.utils.timezone import now
-from .models import TwitchToken, BlueProfile, GuildApplicants
+from .models import TwitchToken, BlueProfile
 
 logger = logging.getLogger('celery')
 
 
-@task(name='notify_guild_app')
-def notify_guild_app(app_id):
-    logger.info('notify_guild_app: executed')
-    app = GuildApplicants.objects.get(id=app_id)
-    message = ('New Guild Application: **{char_name} - {char_role}**\n'
-               'Warcraft Logs: {warcraft_logs}\n'
-               'Raid Experience:```\n{raid_exp}\n```').format(**app.__dict__)
-    send_discord_message(settings.BLUE_DISCORD_APP_CHANNEL, message)
-    return 'Finished'
+# @task(name='notify_guild_app')
+# def notify_guild_app(app_id):
+#     logger.info('notify_guild_app: executed')
+#     app = GuildApplicants.objects.get(id=app_id)
+#     message = ('New Guild Application: **{char_name} - {char_role}**\n'
+#                'Warcraft Logs: {warcraft_logs}\n'
+#                'Raid Experience:```\n{raid_exp}\n```').format(**app.__dict__)
+#     send_discord_message(settings.BLUE_DISCORD_APP_CHANNEL, message)
+#     return 'Finished'
 
 
 @task(name='check_twitch_live')

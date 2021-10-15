@@ -11,15 +11,7 @@
 
             <h1>Blue News</h1>
 
-            {% if request.user.blue_team_officer %}
-                <p>Officers can add/edit Blue News from the
-                    <a class="text-info" href="{% url 'admin:index' %}">Admin Panel</a>.</p>
-            {% endif %}
-
-            {% for news in blue_news %}
-                {% include 'include/news.html' with news=news %}
-                <br>
-            {% endfor %}
+            <p>Coming Soon...</p>
 
         </div>
     </div>

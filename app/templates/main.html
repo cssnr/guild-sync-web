@@ -49,9 +49,6 @@
                     <li class="nav-item {% block news_active %}{% endblock %}">
                         <a class="nav-link" href="{% url 'home:news' %}">News</a>
                     </li>
-                    <li class="nav-item {% block roster_active %}{% endblock %}">
-                        <a class="nav-link" href="{% url 'home:roster' %}">Roster</a>
-                    </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown"
                            role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -63,11 +60,6 @@
                             <a class="dropdown-item" href="{% get_config "BLUE_DISCORD_URL" %}">Join our Discord</a>
                         </div>
                     </li>
-                    {% if not request.user.blue_team_member %}
-                        <li class="nav-item {% block apply_active %}{% endblock %}">
-                            <a class="nav-link" href="{% url 'home:apply' %}">Apply to Blue</a>
-                        </li>
-                    {% endif %}
                 </ul>
 
                 {% if not request.user.is_authenticated %}
@@ -78,13 +70,8 @@
 
                 {% else %}
                     {# Logged In #}
-                    {% if user.blue_team_member %}
-                        <a href="{% url 'home:profile' %}" class="text-info mr-3">
-                            {% if user.first_name %}{{ user.first_name }}{% else %}{{ user.username }}{% endif %}</a>
-                    {% else %}
-                        <a href="https://discord.com/login" class="text-info mr-3" target="_blank">
-                            {% if user.first_name %}{{ user.first_name }}{% else %}{{ user.username }}{% endif %}</a>
-                    {% endif %}
+                    <a href="{% url 'home:profile' %}" class="text-info mr-3">
+                        {% if user.first_name %}{{ user.first_name }}{% else %}{{ user.username }}{% endif %}</a>
                     {% if user.is_superuser %}
                         <a href="{% url 'flower' %}" class="btn btn-outline-success mr-1" role="button" target="_blank">
                             Flower <i class="fas fa-fan"></i></a>
