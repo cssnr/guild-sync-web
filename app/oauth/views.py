@@ -150,12 +150,12 @@ def update_profile(user, user_profile):
     Update Django user profile with provided data
     """
 
-    officers = Group.objects.get(name='Officers')
-    logger.debug('blue_team_officer: %s', user_profile['blue_team_officer'])
-    if user_profile['blue_team_officer']:
-        officers.user_set.add(user)
-    else:
-        officers.user_set.remove(user)
+    # officers = Group.objects.get(name='Officers')
+    # logger.debug('blue_team_officer: %s', user_profile['blue_team_officer'])
+    # if user_profile['blue_team_officer']:
+    #     officers.user_set.add(user)
+    # else:
+    #     officers.user_set.remove(user)
 
     user.first_name = user_profile['username']
     user.last_name = user_profile['discriminator']
