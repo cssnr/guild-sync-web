@@ -1,5 +1,5 @@
 <ul>
     {% for server in server_list %}
-        <li>{{  server.name }}</li>
+        <li><a href="{% url 'home:server' serverid=server.id %}">{{ server.name }}</a></li>
     {% endfor %}
 </ul>
