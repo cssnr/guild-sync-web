@@ -17,7 +17,7 @@ def is_blue_member(user):
 def home_view(request):
     # View: /
     if 'server_list' not in request.session:
-        request.session['server_list'] = get_discord_servers()
+        request.session['server_list'] = get_discord_servers(request.user)
     data = {
         'server_list': request.session['server_list'],
     }
