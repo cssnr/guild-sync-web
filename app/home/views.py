@@ -1,6 +1,7 @@
 import logging
 import requests
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import JsonResponse
 from django.shortcuts import HttpResponseRedirect, render
@@ -100,26 +101,27 @@ def callback_view(request):
     # View  /callback/
     """
     try:
-        if 'code' in request.GET:
+        if 'code' in request.GET and 'guild_id' in request.GET:
             # bot added successfully
             return_code = request.GET['code']
             logger.debug('return_code: %s', return_code)
-
-        if 'error' in request.GET:
-            # error adding bot
-            logger.warning(request.GET['error'])
-            logger.warning(request.GET['error_description'])
-
-        if 'guild_id' in request.GET:
-            # guild known on return
+            messages.add_message(request, messages.SUCCESS, 'Bot Added Successfully!', extra_tags='success')
             guild_id = request.GET['guild_id']
             logger.debug('guild_id: %s', guild_id)
             server_url = reverse('home:server', kwargs={'serverid': guild_id})
             logger.debug('server_url: %s', server_url)
             return HttpResponseRedirect(server_url)
+        elif 'error' in request.GET:
+            # caught error adding bot
+            logger.warning(request.GET['error'])
+            logger.warning(request.GET['error_description'])
+            full_error = '{}: {}'.format(request.GET['error'], request.GET['error_description'])
+            messages.add_message(request, messages.ERROR, full_error, extra_tags='danger')
+            return HttpResponseRedirect('/')
         else:
-            # guild unknown on return, might add a hack to fix this...
-            logger.debug('Guild unknown, will redirect home for now...')
+            # unknown error
+            logger.error('Unknown Error!')
+            messages.add_message(request, messages.ERROR, 'Bro, how did you get here?', extra_tags='danger')
             return HttpResponseRedirect('/')
 
     except Exception as error:

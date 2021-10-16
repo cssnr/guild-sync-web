@@ -88,6 +88,22 @@
         </nav>
     {% endblock %}
 
+    {% block messages %}
+        <div class="row mt-2">
+            <div class="col">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.extra_tags }} alert-dismissible fade show my-1" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span></button>
+                            {{ message.message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    {% endblock %}
+
     {% block body %}{% endblock %}
 
     {% block footer %}{% endblock %}
