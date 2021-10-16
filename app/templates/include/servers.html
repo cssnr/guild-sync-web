@@ -5,20 +5,15 @@
         <div class="col-sm-6 col-md-4" style="padding-top: 15px;">
         <div class="tile">
         <div style="padding: 1px 10px 10px 10px;">
-            <h1>
-                <a href="{% url 'home:server' serverid=server.id %}">{{ server.name }}</a>
-            </h1>
             <div class="media">
-                <div class="media-left">
-                    <a href="{% url 'home:server' serverid=server.id %}">
-                        <img class="media-object"
-                             src="https://cdn.discordapp.com/icons/{{ server.id }}/{{ server.icon }}.png"
-                             alt="{{ server.name }}">
-                    </a>
-                </div>
                 <div class="media-body">
-                    <h4 class="media-heading">Join Discord</h4>
-                    Text, voice, and video chat...
+                    <div class="media-left">
+                        <a href="{% url 'home:server' serverid=server.id %}">
+                            <img class="media-object"
+                                 src="https://cdn.discordapp.com/icons/{{ server.id }}/{{ server.icon }}.png"
+                                 alt="{{ server.name }}">
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
