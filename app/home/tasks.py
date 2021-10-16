@@ -1,9 +1,9 @@
-import datetime
+# import datetime
 import logging
 import requests
-from celery.decorators import task
+# from celery.decorators import task
 from django.conf import settings
-from django.utils.timezone import now
+# from django.utils.timezone import now
 # from .models import ServerProfile
 
 logger = logging.getLogger('celery')
@@ -26,7 +26,7 @@ def send_discord_message(channel_id, message):
         channel_id,
     )
     headers = {
-        'Authorization': 'Bot {}'.format(settings.ISCORD_BOT_TOKEN),
+        'Authorization': 'Bot {}'.format(settings.DISCORD_BOT_TOKEN),
     }
     data = {'content': message}
     r = requests.post(url, headers=headers, data=data, timeout=10)

@@ -81,6 +81,13 @@ def server_view(request, serverid):
         server_profile = {} if not server_profile else server_profile
         server_data = get_server_by_id(request, serverid)
         logger.debug(server_data)
+        if server_profile and server_profile.is_enabled:
+            enabled = check_guild_user(serverid, settings.DISCORD_BOT_USER_ID)
+            if not enabled:
+                server_profile.is_enabled = False
+                server_profile.save()
+                msg = 'Bot has been removed from server and must be re-enabled.'
+                messages.add_message(request, messages.WARNING, msg, extra_tags='warning')
         data = {'server_data': server_data, 'server_profile': server_profile}
         request.session['last_server'] = serverid
         return render(request, 'server.html', data)
@@ -152,6 +159,22 @@ def get_discord_servers(user):
     return server_list
 
 
+def check_guild_user(serverid, userid):
+    url = '{}/guilds/{}/members/{}'.format(
+        settings.DISCORD_API_URL,
+        serverid, userid,
+    )
+    headers = {
+        'Authorization': 'Bot {}'.format(settings.DISCORD_BOT_TOKEN),
+    }
+    r = requests.get(url, headers=headers, timeout=10)
+    if not r.ok:
+        logger.debug('r.status_code: %s', r.status_code)
+        logger.debug('r.content: %s', r.content)
+        return False
+    return True
+
+
 def get_server_by_id(request, serverid):
     for server in request.session['server_list']:
         if server['id'] == serverid:
@@ -159,25 +182,3 @@ def get_server_by_id(request, serverid):
             return server
     logger.warning('NO Matching Servers!')
     return None
-
-
-def google_verify(request):
-    if 'gverified' in request.session and request.session['gverified']:
-        return True
-    try:
-        url = 'https://www.google.com/recaptcha/api/siteverify'
-        data = {
-            'secret': settings.GOOGLE_SITE_SECRET,
-            'response': request.POST['g-recaptcha-response']
-        }
-        r = requests.post(url, data=data, timeout=6)
-        j = r.json()
-        logger.debug(j)
-        if j['success']:
-            request.session['gverified'] = True
-            return True
-        else:
-            return False
-    except Exception as error:
-        logger.exception(error)
-        return False
