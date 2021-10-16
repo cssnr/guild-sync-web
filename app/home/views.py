@@ -72,6 +72,7 @@ def server_view(request, serverid):
         server_profile = ServerProfile.objects.filter(server_id=serverid).first()
         server_profile = {} if not server_profile else server_profile
         server_data = get_server_by_id(request, serverid)
+        logger.debug(server_data)
         data = {'server_data': server_data, 'server_profile': server_profile}
         return render(request, 'server.html', data)
 
@@ -104,8 +105,11 @@ def get_discord_servers(user):
 
 def get_server_by_id(request, serverid):
     for server in request.session['server_list']:
+        logger.debug('Checking server: %s' % server['id'])
         if server['id'] == serverid:
+            logger.debug('Matched server: %s' % server['id'])
             return server
+    logger.warning('NO Matching Servers!')
     return None
 
 
