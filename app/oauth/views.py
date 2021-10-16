@@ -142,6 +142,7 @@ def get_user_profile(access_token):
         'discriminator': user_profile['discriminator'],
         'django_username': user_profile['username'] + user_profile['discriminator'],
         'avatar': user_profile['avatar'],
+        'access_token': access_token,
     }
 
 
@@ -163,6 +164,7 @@ def update_profile(user, user_profile):
     user.discriminator = user_profile['discriminator']
     user.discord_id = user_profile['id']
     user.avatar_hash = user_profile['avatar']
+    user.access_token = user_profile['access_token']
     return user
 
 
