@@ -103,7 +103,7 @@ def get_discord_servers(user):
 
 
 def get_server_by_id(request, serverid):
-    for server in request.session['servers']:
+    for server in request.session['server_list']:
         if server['id'] == serverid:
             return server
     return None
