@@ -73,6 +73,7 @@ def server_view(request, serverid):
         server_profile = {} if not server_profile else server_profile
         server_data = get_server_by_id(request, serverid)
         logger.debug(server_data)
+        logger.debug(type(server_data))
         data = {'server_data': server_data, 'server_profile': server_profile}
         return render(request, 'server.html', data)
 
