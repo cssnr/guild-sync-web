@@ -1,0 +1,18 @@
+{% extends "main.html" %}
+{% block server_active %}active{% endblock %}
+{% block title %}{{ server_data.name }}{% endblock %}
+{% load home_tags %}
+
+{% block head %}{% endblock %}
+
+{% block body %}
+    <div class="row mt-2">
+        <div class="col">
+
+            <h1>{{ server_data.name }}</h1>
+
+            <p>Coming Soon...</p>
+
+        </div>
+    </div>
+{% endblock %}

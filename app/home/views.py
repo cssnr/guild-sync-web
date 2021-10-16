@@ -10,7 +10,7 @@ from .models import UserProfile, ServerProfile
 logger = logging.getLogger('app')
 
 
-def is_blue_member(user):
+def is_auth_user(user):
     return user.is_authenticated
 
 
@@ -31,7 +31,7 @@ def news_view(request):
 
 
 @login_required
-@user_passes_test(is_blue_member, login_url='/')
+@user_passes_test(is_auth_user, login_url='/')
 def profile_view(request):
     # View: /profile/
     if not request.method == 'POST':
@@ -64,6 +64,26 @@ def profile_view(request):
             return JsonResponse({'err_msg': str(error)}, status=400)
 
 
+@login_required
+@user_passes_test(is_auth_user, login_url='/')
+def server_view(request, serverid):
+    # View: /server/{serverid}/
+    if not request.method == 'POST':
+        server_profile = ServerProfile.objects.filter(server_id=serverid).first()
+        server_profile = {} if not server_profile else server_profile
+        server_data = get_server_by_id(request, serverid)
+        data = {'server_data': server_data, 'server_profile': server_profile}
+        return render(request, 'server.html', data)
+
+    else:
+        try:
+            logger.debug(request.POST)
+            return JsonResponse({}, status=400)
+        except Exception as error:
+            logger.warning(error)
+            return JsonResponse({'err_msg': str(error)}, status=400)
+
+
 def get_discord_servers(user):
     url = '{}/users/@me/guilds'.format(settings.DISCORD_API_URL)
     headers = {
@@ -80,6 +100,13 @@ def get_discord_servers(user):
             server_list.append(server)
     logger.debug(server_list)
     return server_list
+
+
+def get_server_by_id(request, serverid):
+    for server in request.session['servers']:
+        if server['id'] == serverid:
+            return server
+    return None
 
 
 def google_verify(request):
