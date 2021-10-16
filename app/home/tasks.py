@@ -22,7 +22,7 @@ logger = logging.getLogger('celery')
 
 def send_discord_message(channel_id, message):
     url = '{}/channels/{}/messages'.format(
-        settings.DISCORD_API_ENDPOINT,
+        settings.DISCORD_API_URL,
         channel_id,
     )
     headers = {

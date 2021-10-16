@@ -16,9 +16,10 @@ def is_blue_member(user):
 
 def home_view(request):
     # View: /
-    discord_profile = None
+    if 'server_list' not in request.session:
+        request.session['server_list'] = get_discord_servers()
     data = {
-        'discord_profile': discord_profile,
+        'server_list': request.session['server_list'],
     }
     return render(request, 'home.html', data)
 
@@ -60,6 +61,22 @@ def profile_view(request):
         except Exception as error:
             logger.warning(error)
             return JsonResponse({'err_msg': str(error)}, status=400)
+
+
+def get_discord_servers(user):
+    url = '{}/users/@me/guilds'.format(settings.DISCORD_API_URL)
+    headers = {
+        'Authorization':  'Bearer {}'.format(user.access_token),
+    }
+    r = requests.post(url, headers=headers, timeout=6)
+    j = r.json()
+    logger.debug(j)
+    server_list = []
+    for server in j:
+        if server['permissions'] == 2147483647:
+            server_list.append(server)
+    logger.debug(server_list)
+    return server_list
 
 
 def google_verify(request):

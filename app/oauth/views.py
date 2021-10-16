@@ -95,7 +95,7 @@ def get_access_token(code):
     """
     Post OAuth code and Return access_token
     """
-    url = '{}/oauth2/token'.format(settings.DISCORD_API_ENDPOINT)
+    url = '{}/oauth2/token'.format(settings.DISCORD_API_URL)
     data = {
         'client_id': settings.DISCORD_CLIENT_ID,
         'client_secret': settings.DISCORD_CLIENT_SECRET,
@@ -114,7 +114,7 @@ def get_user_profile(access_token):
     """
     Get Profile for Authenticated User
     """
-    url = '{}/users/@me'.format(settings.DISCORD_API_ENDPOINT)
+    url = '{}/users/@me'.format(settings.DISCORD_API_URL)
     headers = {
         'Authorization': 'Bearer {}'.format(access_token),
     }
@@ -124,7 +124,7 @@ def get_user_profile(access_token):
     user_profile = r.json()
 
     # url = '{}/guilds/{}/members/{}'.format(
-    #     settings.DISCORD_API_ENDPOINT,
+    #     settings.DISCORD_API_URL,
     #     settings.BLUE_DISCORD_ID,
     #     user_profile['id'],
     # )
