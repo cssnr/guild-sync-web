@@ -19,17 +19,17 @@ def do_oauth(request):
     """
     request.session['login_redirect_url'] = get_next_url(request)
     params = {
-        'client_id': settings.DISCORD_CLIENT_ID,
-        'redirect_uri': settings.DISCORD_REDIRECT_URI,
+        'client_id': settings.OAUTH_CLIENT_ID,
+        'redirect_uri': settings.OAUTH_REDIRECT_URI,
         'response_type': 'code',
-        'scope': settings.DISCORD_SCOPE,
+        'scope': settings.OAUTH_SCOPE,
     }
     url_params = urllib.parse.urlencode(params)
     url = 'https://discord.com/api/oauth2/authorize?{}'.format(url_params)
     return HttpResponseRedirect(url)
 
 
-def callback(request):
+def oauth_callback(request):
     """
     # View  /oauth/callback/
     """
@@ -61,6 +61,7 @@ def log_out(request):
     next_url = get_next_url(request)
 
     # Hack to prevent login loop when logging out on a secure page
+    # This probably needs to be improved and may not work as expected
     if next_url.strip('/') in ['profile']:
         next_url = '/'
     logger.debug('next_url: %s', next_url)
@@ -97,10 +98,10 @@ def get_access_token(code):
     """
     url = '{}/oauth2/token'.format(settings.DISCORD_API_URL)
     data = {
-        'client_id': settings.DISCORD_CLIENT_ID,
-        'client_secret': settings.DISCORD_CLIENT_SECRET,
-        'grant_type': settings.DISCORD_GRANT_TYPE,
-        'redirect_uri': settings.DISCORD_REDIRECT_URI,
+        'client_id': settings.OAUTH_CLIENT_ID,
+        'client_secret': settings.OAUTH_CLIENT_SECRET,
+        'grant_type': settings.OAUTH_GRANT_TYPE,
+        'redirect_uri': settings.OAUTH_REDIRECT_URI,
         'code': code,
     }
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}

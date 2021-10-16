@@ -12,7 +12,11 @@
             <h1>{{ server_data.name }}</h1>
             <img src="https://cdn.discordapp.com/icons/{{ server_data.id }}/{{ server_data.icon }}.png" class="img-thumbnail" alt="{{ server_data.name }}">
             <p>Server ID: {{ server_data.id }}</p>
-            <p>Coming Soon...</p>
+
+            {% if not server_data.is_enabled %}
+                <a class="btn btn-success btn-lg" role="button"
+                    href="{% get_bot_url server_data.id %}">Enable Guild Sync</a>
+            {% endif %}
 
         </div>
     </div>

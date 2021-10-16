@@ -3,7 +3,8 @@ import requests
 from django.conf import settings
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import HttpResponseRedirect, render
+from django.urls import reverse
 from .forms import ProfileForm
 from .models import UserProfile, ServerProfile
 
@@ -15,7 +16,9 @@ def is_auth_user(user):
 
 
 def home_view(request):
-    # View: /
+    """
+    # View  /
+    """
     if 'server_list' not in request.session and request.user.is_authenticated:
         request.session['server_list'] = get_discord_servers(request.user)
     if 'server_list' in request.session:
@@ -26,14 +29,18 @@ def home_view(request):
 
 
 def news_view(request):
-    # View: /news/
+    """
+    # View  /news/
+    """
     return render(request, 'news.html')
 
 
 @login_required
 @user_passes_test(is_auth_user, login_url='/')
 def profile_view(request):
-    # View: /profile/
+    """
+    # View  /profile/
+    """
     if not request.method == 'POST':
         blue_profile = UserProfile.objects.filter(
             discord_id=request.user.discord_id
@@ -47,8 +54,7 @@ def profile_view(request):
             logger.debug(request.POST)
             form = ProfileForm(request.POST)
             if form.is_valid():
-                blue_profile, created = UserProfile.objects.get_or_create(
-                    discord_id=request.user.discord_id)
+                blue_profile, created = UserProfile.objects.get_or_create(discord_id=request.user.discord_id)
                 blue_profile.main_char = form.cleaned_data['main_char']
                 blue_profile.main_class = form.cleaned_data['main_class']
                 blue_profile.main_role = form.cleaned_data['main_role']
@@ -67,14 +73,17 @@ def profile_view(request):
 @login_required
 @user_passes_test(is_auth_user, login_url='/')
 def server_view(request, serverid):
-    # View: /server/{serverid}/
+    """
+    # View  /server/{serverid}
+    """
     if not request.method == 'POST':
         server_profile = ServerProfile.objects.filter(server_id=serverid).first()
         server_profile = {} if not server_profile else server_profile
         server_data = get_server_by_id(request, serverid)
         logger.debug(server_data)
-        logger.debug(type(server_data))
         data = {'server_data': server_data, 'server_profile': server_profile}
+        # request.session['redirect_url'] = reverse('home:server', kwargs={'serverid': serverid})
+        # logger.debug('redirect_url: %s', request.session['redirect_url'])
         return render(request, 'server.html', data)
 
     else:
@@ -84,6 +93,38 @@ def server_view(request, serverid):
         except Exception as error:
             logger.warning(error)
             return JsonResponse({'err_msg': str(error)}, status=400)
+
+
+def callback_view(request):
+    """
+    # View  /callback/
+    """
+    try:
+        if 'code' in request.GET:
+            # bot added successfully
+            return_code = request.GET['code']
+            logger.debug('return_code: %s', return_code)
+
+        if 'error' in request.GET:
+            # error adding bot
+            logger.warning(request.GET['error'])
+            logger.warning(request.GET['error_description'])
+
+        if 'guild_id' in request.GET:
+            # guild known on return
+            guild_id = request.GET['guild_id']
+            logger.debug('guild_id: %s', guild_id)
+            server_url = reverse('home:server', kwargs={'serverid': guild_id})
+            logger.debug('server_url: %s', server_url)
+            return HttpResponseRedirect(server_url)
+        else:
+            # guild unknown on return, might add a hack to fix this...
+            logger.debug('Guild unknown, will redirect home for now...')
+            return HttpResponseRedirect('/')
+
+    except Exception as error:
+        logger.exception(error)
+        return HttpResponseRedirect('/')
 
 
 def get_discord_servers(user):
@@ -106,9 +147,8 @@ def get_discord_servers(user):
 
 def get_server_by_id(request, serverid):
     for server in request.session['server_list']:
-        logger.debug('Checking server: %s' % server['id'])
         if server['id'] == serverid:
-            logger.debug('Matched server: %s' % server['id'])
+            logger.debug('Matched server: %s', server['id'])
             return server
     logger.warning('NO Matching Servers!')
     return None
