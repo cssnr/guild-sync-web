@@ -1,4 +1,4 @@
-<div class="row row-cols-4">
+<div class="row">
     {% for server in server_list %}
 {#        <li><a href="{% url 'home:server' serverid=server.id %}">{{ server.name }}</a></li>#}
 
@@ -7,8 +7,8 @@
         <div style="padding: 1px 10px 10px 10px;">
             <div class="media">
                 <div class="media-body">
-                    <div class="media-left">
-                        <p>{{ server.name }}</p>
+                    <div class="media-center">
+                        <p class="text-center">{{ server.name }}</p>
                         <a href="{% url 'home:server' serverid=server.id %}">
                             <img class="media-object"
                                  src="https://cdn.discordapp.com/icons/{{ server.id }}/{{ server.icon }}.png"
