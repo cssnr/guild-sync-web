@@ -68,9 +68,11 @@ def get_discord_servers(user):
     headers = {
         'Authorization':  'Bearer {}'.format(user.access_token),
     }
-    r = requests.post(url, headers=headers, timeout=6)
+    r = requests.get(url, headers=headers, timeout=6)
     j = r.json()
     logger.debug(j)
+    if not r.ok:
+        r.raise_for_status()
     server_list = []
     for server in j:
         if server['permissions'] == 2147483647:
