@@ -16,11 +16,12 @@ def is_blue_member(user):
 
 def home_view(request):
     # View: /
-    if 'server_list' not in request.session:
+    if 'server_list' not in request.session and request.user.is_authenticated:
         request.session['server_list'] = get_discord_servers(request.user)
-    data = {
-        'server_list': request.session['server_list'],
-    }
+    if 'server_list' in request.session:
+        data = {'server_list': request.session['server_list']}
+    else:
+        data = {}
     return render(request, 'home.html', data)
 
 
@@ -69,10 +70,10 @@ def get_discord_servers(user):
         'Authorization':  'Bearer {}'.format(user.access_token),
     }
     r = requests.get(url, headers=headers, timeout=6)
-    j = r.json()
-    logger.debug(j)
     if not r.ok:
         r.raise_for_status()
+    j = r.json()
+    logger.debug(j)
     server_list = []
     for server in j:
         if server['permissions'] == 2147483647:

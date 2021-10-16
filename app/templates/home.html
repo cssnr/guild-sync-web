@@ -17,6 +17,7 @@
                 {% if not server_list %}
                     <p>No servers that you can manage.</p>
                 {% else %}
+                    <p>These are the servers you can manage:</p>
                     <ul>
                     {% for server in server_list %}
                             <li>{{  server.name }}</li>
