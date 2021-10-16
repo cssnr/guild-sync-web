@@ -50,25 +50,24 @@ def profile_view(request):
         data = {'blue_profile': blue_profile}
         return render(request, 'profile.html', data)
 
-    else:
-        try:
-            logger.debug(request.POST)
-            form = ProfileForm(request.POST)
-            if form.is_valid():
-                blue_profile, created = UserProfile.objects.get_or_create(discord_id=request.user.discord_id)
-                blue_profile.main_char = form.cleaned_data['main_char']
-                blue_profile.main_class = form.cleaned_data['main_class']
-                blue_profile.main_role = form.cleaned_data['main_role']
-                blue_profile.user_description = form.cleaned_data['user_description']
-                blue_profile.twitch_username = form.cleaned_data['twitch_username']
-                blue_profile.show_in_roster = bool(form.cleaned_data['show_in_roster'])
-                blue_profile.save()
-                return JsonResponse({}, status=200)
-            else:
-                return JsonResponse(form.errors, status=400)
-        except Exception as error:
-            logger.warning(error)
-            return JsonResponse({'err_msg': str(error)}, status=400)
+    try:
+        logger.debug(request.POST)
+        form = ProfileForm(request.POST)
+        if form.is_valid():
+            blue_profile, created = UserProfile.objects.get_or_create(discord_id=request.user.discord_id)
+            blue_profile.main_char = form.cleaned_data['main_char']
+            blue_profile.main_class = form.cleaned_data['main_class']
+            blue_profile.main_role = form.cleaned_data['main_role']
+            blue_profile.user_description = form.cleaned_data['user_description']
+            blue_profile.twitch_username = form.cleaned_data['twitch_username']
+            blue_profile.show_in_roster = bool(form.cleaned_data['show_in_roster'])
+            blue_profile.save()
+            return JsonResponse({}, status=200)
+        else:
+            return JsonResponse(form.errors, status=400)
+    except Exception as error:
+        logger.warning(error)
+        return JsonResponse({'err_msg': str(error)}, status=400)
 
 
 @login_required
@@ -83,17 +82,15 @@ def server_view(request, serverid):
         server_data = get_server_by_id(request, serverid)
         logger.debug(server_data)
         data = {'server_data': server_data, 'server_profile': server_profile}
-        # request.session['redirect_url'] = reverse('home:server', kwargs={'serverid': serverid})
-        # logger.debug('redirect_url: %s', request.session['redirect_url'])
+        request.session['last_server'] = serverid
         return render(request, 'server.html', data)
 
-    else:
-        try:
-            logger.debug(request.POST)
-            return JsonResponse({}, status=400)
-        except Exception as error:
-            logger.warning(error)
-            return JsonResponse({'err_msg': str(error)}, status=400)
+    try:
+        logger.debug(request.POST)
+        return JsonResponse({}, status=400)
+    except Exception as error:
+        logger.warning(error)
+        return JsonResponse({'err_msg': str(error)}, status=400)
 
 
 def callback_view(request):
@@ -103,29 +100,37 @@ def callback_view(request):
     try:
         if 'code' in request.GET and 'guild_id' in request.GET:
             # bot added successfully
-            return_code = request.GET['code']
-            logger.debug('return_code: %s', return_code)
-            messages.add_message(request, messages.SUCCESS, 'Bot Added Successfully!', extra_tags='success')
+            logger.debug('code: %s', request.GET['code'])
             guild_id = request.GET['guild_id']
             logger.debug('guild_id: %s', guild_id)
-            server_url = reverse('home:server', kwargs={'serverid': guild_id})
-            logger.debug('server_url: %s', server_url)
-            return HttpResponseRedirect(server_url)
-        elif 'error' in request.GET:
-            # caught error adding bot
+
+            server_profile, created = ServerProfile.objects.get_or_create(server_id=guild_id)
+            server_profile.is_enabled = True
+            server_profile.save()
+
+            messages.add_message(request, messages.SUCCESS, 'Bot Added Successfully!', extra_tags='success')
+
+            r_url = reverse('home:server', kwargs={'serverid': guild_id})
+            logger.debug('r_url: %s', r_url)
+            return HttpResponseRedirect(r_url)
+
+        if 'error' in request.GET:
+            # known error adding bot
             logger.warning(request.GET['error'])
             logger.warning(request.GET['error_description'])
             full_error = '{}: {}'.format(request.GET['error'], request.GET['error_description'])
             messages.add_message(request, messages.ERROR, full_error, extra_tags='danger')
-            return HttpResponseRedirect('/')
         else:
-            # unknown error
-            logger.error('Unknown Error!')
-            messages.add_message(request, messages.ERROR, 'Bro, how did you get here?', extra_tags='danger')
-            return HttpResponseRedirect('/')
+            # unknown error adding bot
+            logger.error('Error: unknown callback response.')
+            messages.add_message(request, messages.ERROR, 'Error: unknown callback response.', extra_tags='danger')
+        r_url = reverse('home:server', kwargs={'serverid': request.session['last_server']})
+        logger.debug('r_url: %s', r_url)
+        return HttpResponseRedirect(r_url)
 
     except Exception as error:
         logger.exception(error)
+        messages.add_message(request, messages.ERROR, 'Fatal Unknown Error.', extra_tags='danger')
         return HttpResponseRedirect('/')
 
 
