@@ -10,9 +10,8 @@
         <div class="col">
 
             <h1>{{ server_data.name }}</h1>
-            <hp>{{ server_data.id }}</hp>
-            <p>{{ server_data }}</p>
-            <p>{{ server_profile }}</p>
+            <p>Server ID: {{ server_data.id }}</p>
+            <img src="https://cdn.discordapp.com/icons/{{ server_data.id }}/{{ server_data.icon }}.png" class="img-thumbnail" alt="{{ server_data.name }}">
             <p>Coming Soon...</p>
 
         </div>
