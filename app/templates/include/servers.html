@@ -1,25 +1,21 @@
+{% load static %}
+
 <div class="row">
     {% for server in server_list %}
-{#        <li><a href="{% url 'home:server' serverid=server.id %}">{{ server.name }}</a></li>#}
-
-        <div class="col-sm-6 col-md-4" style="padding-top: 15px;">
-        <div class="tile">
-        <div style="padding: 1px 10px 10px 10px;">
-            <div class="media">
-                <div class="media-body">
-                    <div class="media-center">
-                        <p class="text-center">{{ server.name }}</p>
-                        <a href="{% url 'home:server' serverid=server.id %}">
-                            <img class="media-object"
-                                 src="https://cdn.discordapp.com/icons/{{ server.id }}/{{ server.icon }}.png"
-                                 alt="{{ server.name }}">
-                        </a>
-                    </div>
-                </div>
-            </div>
+        <div class="col-sm-6 col-md-4 col-lg-3 col-xl-2" style="padding-top: 15px;">
+        <div class="text-center">
+            <a href="{% url 'home:server' serverid=server.id %}">
+                <img class="img-thumbnail" height="128" width="128"
+                     {% if server.icon %}
+                        src="https://cdn.discordapp.com/icons/{{ server.id }}/{{ server.icon }}.png"
+                     {% else %}
+                        src="{% static 'images/assets/server-placeholder.png' %}"
+                     {% endif %}
+                     alt="{{ server.name }}">
+            </a>
+            <a href="{% url 'home:server' serverid=server.id %}">
+                <p>{{ server.name }}</p></a>
         </div>
         </div>
-        </div>
-
     {% endfor %}
 </div>
