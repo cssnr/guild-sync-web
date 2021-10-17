@@ -4,21 +4,20 @@ ENV TZ=America/Los_Angeles
 RUN apk add --update --no-cache \
     alpine-sdk \
     build-base \
-    linux-headers \
     mysql-dev \
-    openldap-dev \
-    pcre \
-    pcre-dev \
-    python3 \
     python3-dev \
-    py3-pip
+    tzdata
 
 WORKDIR /app
-COPY requirements.txt /app
+RUN addgroup -g 1000 app && \
+    adduser -S -H -h /app -s /sbin/nologin -u 1000 -G app app
 
+ADD --chown=app:app requirements.txt .
 RUN python -m pip install --no-cache-dir --upgrade pip && \
     python -m pip install --no-cache-dir -r requirements.txt
 
-COPY . /app
+RUN mkdir -p /app /data && chown app:app /app /data
+ADD --chown=app:app . .
 
+USER app
 ENTRYPOINT ["sh", "docker-entrypoint.sh"]
