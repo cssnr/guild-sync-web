@@ -1,146 +1,186 @@
 import logging
 import requests
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import JsonResponse
-from django.shortcuts import render
-from .forms import ProfileForm, ApplicantsForm
-from .models import BlueProfile, BlueNews, GuildApplicants
-from .tasks import notify_guild_app
+from django.shortcuts import HttpResponseRedirect, render
+from django.urls import reverse
+from .forms import ProfileForm
+from .models import UserProfile, ServerProfile
 
 logger = logging.getLogger('app')
 
 
-def is_blue_member(user):
-    return user.blue_team_member
-
-
-def is_blue_officer(user):
-    return user.blue_team_officer
+def is_auth_user(user):
+    return user.is_authenticated
 
 
 def home_view(request):
-    # View: /
-    if request.user.is_authenticated:
-        blue_profile = BlueProfile.objects.filter(
-            discord_id=request.user.discord_id
-        ).first()
+    """
+    # View  /
+    """
+    if 'server_list' not in request.session and request.user.is_authenticated:
+        logger.debug('server_list: from DISCORD - api call')
+        request.session['server_list'] = get_discord_servers(request.user)
+    if 'server_list' in request.session:
+        logger.debug('server_list: from session')
+        data = {'server_list': request.session['server_list']}
     else:
-        blue_profile = None
-
-    live_users = BlueProfile.objects.get_live()
-    if live_users:
-        live_user = live_users[0]
-    else:
-        live_user = None
-
-    blue_news = BlueNews.objects.all().order_by('-pk')[:2]
-
-    data = {
-        'blue_profile': blue_profile,
-        'blue_news': blue_news,
-        'live_user': live_user,
-    }
+        data = {}
     return render(request, 'home.html', data)
 
 
 def news_view(request):
-    # View: /roster/
-    blue_news = BlueNews.objects.all().order_by('-pk')[:50]
-    return render(request, 'news.html', {'blue_news': blue_news})
-
-
-def roster_view(request):
-    # View: /roster/
-    guild_roster = BlueProfile.objects.all().order_by('created_at')
-    return render(request, 'roster.html', {'guild_roster': guild_roster})
+    """
+    # View  /news/
+    """
+    return render(request, 'news.html')
 
 
 @login_required
-@user_passes_test(is_blue_member, login_url='/')
+@user_passes_test(is_auth_user, login_url='/')
 def profile_view(request):
-    # View: /profile/
+    """
+    # View  /profile/
+    """
     if not request.method == 'POST':
-        blue_profile = BlueProfile.objects.filter(
+        blue_profile = UserProfile.objects.filter(
             discord_id=request.user.discord_id
         ).first()
         blue_profile = {} if not blue_profile else blue_profile
         data = {'blue_profile': blue_profile}
         return render(request, 'profile.html', data)
 
-    else:
-        try:
-            logger.debug(request.POST)
-            form = ProfileForm(request.POST)
-            if form.is_valid():
-                blue_profile, created = BlueProfile.objects.get_or_create(
-                    discord_id=request.user.discord_id)
-                blue_profile.main_char = form.cleaned_data['main_char']
-                blue_profile.main_class = form.cleaned_data['main_class']
-                blue_profile.main_role = form.cleaned_data['main_role']
-                blue_profile.user_description = form.cleaned_data['user_description']
-                blue_profile.twitch_username = form.cleaned_data['twitch_username']
-                blue_profile.show_in_roster = bool(form.cleaned_data['show_in_roster'])
-                blue_profile.save()
-                return JsonResponse({}, status=200)
-            else:
-                return JsonResponse(form.errors, status=400)
-        except Exception as error:
-            logger.warning(error)
-            return JsonResponse({'err_msg': str(error)}, status=400)
-
-
-def apply_view(request):
-    # View: /apply/
-    if not request.method == 'POST':
-        return render(request, 'apply.html')
-    else:
+    try:
         logger.debug(request.POST)
-        form = ApplicantsForm(request.POST)
+        form = ProfileForm(request.POST)
         if form.is_valid():
-            if not google_verify(request):
-                data = {'err_msg': 'Google CAPTCHA not verified.'}
-                return JsonResponse(data, status=400)
-            new_app = GuildApplicants(
-                char_name=form.cleaned_data['char_name'],
-                char_role=form.cleaned_data['char_role'],
-                warcraft_logs=form.cleaned_data['warcraft_logs'],
-                speed_test=form.cleaned_data['speed_test'],
-                spoken_langs=form.cleaned_data['spoken_langs'],
-                native_lang=form.cleaned_data['native_lang'],
-                fri_raid=form.cleaned_data['fri_raid'],
-                sat_raid=form.cleaned_data['sat_raid'],
-                tue_raid=form.cleaned_data['tue_raid'],
-                raid_exp=form.cleaned_data['raid_exp'],
-                why_blue=form.cleaned_data['why_blue'],
-                contact_info=form.cleaned_data['contact_info'],
-            )
-            new_app.save()
-            request.session['application_submitted'] = True
-            logger.debug('new_app.id: %s', new_app.id)
-            notify_guild_app.delay(new_app.id)
+            blue_profile, created = UserProfile.objects.get_or_create(discord_id=request.user.discord_id)
+            blue_profile.main_char = form.cleaned_data['main_char']
+            blue_profile.main_class = form.cleaned_data['main_class']
+            blue_profile.main_role = form.cleaned_data['main_role']
+            blue_profile.user_description = form.cleaned_data['user_description']
+            blue_profile.twitch_username = form.cleaned_data['twitch_username']
+            blue_profile.show_in_roster = bool(form.cleaned_data['show_in_roster'])
+            blue_profile.save()
             return JsonResponse({}, status=200)
         else:
             return JsonResponse(form.errors, status=400)
+    except Exception as error:
+        logger.warning(error)
+        return JsonResponse({'err_msg': str(error)}, status=400)
 
 
-def google_verify(request):
-    if 'gverified' in request.session and request.session['gverified']:
-        return True
+@login_required
+@user_passes_test(is_auth_user, login_url='/')
+def server_view(request, serverid):
+    """
+    # View  /server/{serverid}
+    """
+    if not request.method == 'POST':
+        server_profile = ServerProfile.objects.filter(server_id=serverid).first()
+        server_profile = {} if not server_profile else server_profile
+        server_data = get_server_by_id(request, serverid)
+        logger.debug(server_data)
+        if server_profile and server_profile.is_enabled:
+            enabled = check_guild_user(serverid, settings.DISCORD_BOT_USER_ID)
+            if not enabled:
+                server_profile.is_enabled = False
+                server_profile.save()
+                msg = 'Bot has been removed from server and must be re-enabled.'
+                messages.add_message(request, messages.WARNING, msg, extra_tags='warning')
+        data = {'server_data': server_data, 'server_profile': server_profile}
+        request.session['last_server'] = serverid
+        return render(request, 'server.html', data)
+
     try:
-        url = 'https://www.google.com/recaptcha/api/siteverify'
-        data = {
-            'secret': settings.GOOGLE_SITE_SECRET,
-            'response': request.POST['g-recaptcha-response']
-        }
-        r = requests.post(url, data=data, timeout=6)
-        j = r.json()
-        logger.debug(j)
-        if j['success']:
-            request.session['gverified'] = True
-            return True
+        logger.debug(request.POST)
+        return JsonResponse({}, status=400)
+    except Exception as error:
+        logger.warning(error)
+        return JsonResponse({'err_msg': str(error)}, status=400)
+
+
+def callback_view(request):
+    """
+    # View  /callback/
+    """
+    try:
+        if 'code' in request.GET and 'guild_id' in request.GET:
+            # bot added successfully
+            logger.debug('code: %s', request.GET['code'])
+            guild_id = request.GET['guild_id']
+            logger.debug('guild_id: %s', guild_id)
+
+            server_profile, created = ServerProfile.objects.get_or_create(server_id=guild_id)
+            server_profile.is_enabled = True
+            server_profile.save()
+
+            messages.add_message(request, messages.SUCCESS, 'Bot Added Successfully!', extra_tags='success')
+
+            r_url = reverse('home:server', kwargs={'serverid': guild_id})
+            logger.debug('r_url: %s', r_url)
+            return HttpResponseRedirect(r_url)
+
+        if 'error' in request.GET:
+            # known error adding bot
+            logger.warning(request.GET['error'])
+            logger.warning(request.GET['error_description'])
+            full_error = '{}: {}'.format(request.GET['error'], request.GET['error_description'])
+            messages.add_message(request, messages.ERROR, full_error, extra_tags='danger')
         else:
-            return False
+            # unknown error adding bot
+            logger.error('Error: unknown callback response.')
+            messages.add_message(request, messages.ERROR, 'Error: unknown callback response.', extra_tags='danger')
+        r_url = reverse('home:server', kwargs={'serverid': request.session['last_server']})
+        logger.debug('r_url: %s', r_url)
+        return HttpResponseRedirect(r_url)
+
     except Exception as error:
         logger.exception(error)
+        messages.add_message(request, messages.ERROR, 'Fatal Unknown Error.', extra_tags='danger')
+        return HttpResponseRedirect('/')
+
+
+def get_discord_servers(user):
+    url = '{}/users/@me/guilds'.format(settings.DISCORD_API_URL)
+    headers = {
+        'Authorization':  'Bearer {}'.format(user.access_token),
+    }
+    r = requests.get(url, headers=headers, timeout=6)
+    if not r.ok:
+        r.raise_for_status()
+    j = r.json()
+    logger.debug(j)
+    server_list = []
+    for server in j:
+        if server['permissions'] == 2147483647:
+            server_list.append(server)
+    logger.debug(server_list)
+    return server_list
+
+
+def check_guild_user(serverid, userid):
+    url = '{}/guilds/{}/members/{}'.format(
+        settings.DISCORD_API_URL,
+        serverid, userid,
+    )
+    headers = {
+        'Authorization': 'Bot {}'.format(settings.DISCORD_BOT_TOKEN),
+    }
+    r = requests.get(url, headers=headers, timeout=10)
+    if not r.ok:
+        logger.debug('r.status_code: %s', r.status_code)
+        logger.debug('r.content: %s', r.content)
         return False
+    return True
+
+
+def get_server_by_id(request, serverid):
+    for server in request.session['server_list']:
+        if server['id'] == serverid:
+            logger.debug('Matched server: %s', server['id'])
+            return server
+    logger.warning('NO Matching Servers!')
+    return None

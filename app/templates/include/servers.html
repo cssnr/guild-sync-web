@@ -1,0 +1,21 @@
+{% load static %}
+
+<div class="row">
+    {% for server in server_list %}
+        <div class="col-sm-6 col-md-4 col-lg-3 col-xl-2" style="padding-top: 15px;">
+        <div class="text-center">
+            <a href="{% url 'home:server' serverid=server.id %}">
+                <img class="img-thumbnail" height="128" width="128"
+                     {% if server.icon %}
+                        src="https://cdn.discordapp.com/icons/{{ server.id }}/{{ server.icon }}.png"
+                     {% else %}
+                        src="{% static 'images/assets/server-placeholder.png' %}"
+                     {% endif %}
+                     alt="{{ server.name }}">
+            </a>
+            <a href="{% url 'home:server' serverid=server.id %}">
+                <p>{{ server.name }}</p></a>
+        </div>
+        </div>
+    {% endfor %}
+</div>

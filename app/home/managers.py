@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class BlueProfileManager(models.Manager):
+class UserProfileManager(models.Manager):
     def get_active(self):
         return self.filter(show_in_roster=True)
 
@@ -9,6 +9,6 @@ class BlueProfileManager(models.Manager):
         return self.filter(live_on_twitch=True)
 
 
-class BlueNewsManager(models.Manager):
-    def get_active(self):
-        return self.filter(published=True)
+class ServerProfileManager(models.Manager):
+    def get_enabled(self):
+        return self.filter(is_enabled=True)

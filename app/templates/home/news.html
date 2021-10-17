@@ -1,6 +1,0 @@
-<h2><a class="text-info" href="{% url 'home:news' %}">Blue News</a></h2>
-{% for news in blue_news %}
-    {% include 'include/news.html' with news=news %}
-    <br>
-{% endfor %}
-<p><a class="text-info" href="{% url 'home:news' %}">Read more news...</a></p>
