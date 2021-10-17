@@ -45,7 +45,7 @@ services:
   beat:
     image: discord-sync-docker-app:latest
     env_file: settings.env
-    command: "celery -A discordsync beat -l INFO -s /celerybeat-schedule"
+    command: "celery -A discordsync beat -l INFO -S django"
     deploy:
       replicas: 1
     depends_on:
