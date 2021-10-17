@@ -45,7 +45,7 @@ services:
   beat:
     image: registry.hosted-domains.com/shane/discord-sync-docker-app:${VERSION}
     env_file: ${ENV_FILE}
-    command: "celery -A discordsync beat -l INFO -s /celerybeat-schedule"
+    command: "celery -A discordsync beat -l INFO -S django"
     deploy:
       replicas: 1
     depends_on:
