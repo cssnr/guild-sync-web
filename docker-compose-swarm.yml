@@ -4,13 +4,10 @@ services:
   nginx:
     build: ./nginx
     image: registry.hosted-domains.com/shane/discord-sync-docker-nginx:${VERSION}
-    env_file: ${ENV_FILE}
     deploy:
       mode: global
     volumes:
       - data_dir:/data
-    depends_on:
-      - app
     secrets:
       - source: cssnr.com.crt
         target: /etc/ssl/cssnr.com.crt
@@ -20,9 +17,8 @@ services:
         target: /etc/nginx/auth.users
     ports:
       - "${DOCKER_PORT}:443"
-    links:
-      - "app"
-      - "flower"
+    depends_on:
+      - app
 
   app:
     build: ./app
@@ -56,13 +52,6 @@ services:
       - app
       - redis
 
-  redis:
-    image: redis:6-alpine
-    deploy:
-      replicas: 1
-    volumes:
-      - redis_data:/data
-
   flower:
     image: mher/flower
     env_file: ${ENV_FILE}
@@ -70,6 +59,22 @@ services:
       replicas: 1
     volumes:
       - flower_data:/data
+    depends_on:
+      - app
+
+  redis:
+    image: redis:6-alpine
+    command: "redis-server --appendonly yes"
+    deploy:
+      replicas: 1
+    volumes:
+      - redis_data:/data
+
+  memcached:
+    image: memcached:alpine
+    command: "memcached -I 4M"
+    deploy:
+      replicas: 1
 
 secrets:
   cssnr.com.crt:

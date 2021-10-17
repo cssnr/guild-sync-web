@@ -6,6 +6,7 @@
 {% block head %}{% endblock %}
 
 {% block body %}
+
     <div class="row mt-2">
         <div class="col">
 
@@ -15,16 +16,19 @@
             <p>{{ server_data.id }}</p>
 
             {% if not server_profile.is_enabled %}
-                <p>
-                <a class="btn btn-lg btn-success" role="button"
-                    href="{% get_bot_url server_data.id %}">Enable Guild Sync</a>
-                </p>
+
+                <p><a class="btn btn-lg btn-success" role="button"
+                    href="{% get_bot_url server_data.id %}">Enable Guild Sync</a></p>
+
             {% else %}
+
                 <p><button type="button" class="btn btn-lg btn-outline-success" disabled>Bot Enabled</button></p>
                 <h4>Settings</h4>
                 <p>Coming Soon...</p>
+
             {% endif %}
 
         </div>
     </div>
+
 {% endblock %}

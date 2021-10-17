@@ -6,6 +6,7 @@
 {% block head %}{% endblock %}
 
 {% block body %}
+
     <div class="row mt-2">
 
         <div class="col">
@@ -22,7 +23,7 @@
                 {% endif %}
             {% else %}
                 <p class="lead">Hello and welcome to the Discord Guild Sync website.</p>
-                <p><a href="{% url 'oauth:login' %}?next={{ request.path }}" class="btn btn-lg btn-outline-success" role="button">
+                <p><a href="{% url 'oauth:login' %}?next={{ request.path }}" class="btn btn-lg btn-outline-primary" role="button">
                     Log in with Discord
                     <i class="fas fa-sign-in-alt"></i></a></p>
             {% endif %}
@@ -33,4 +34,5 @@
         </div>
 
     </div>
+
 {% endblock %}

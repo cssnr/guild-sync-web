@@ -1,23 +1,15 @@
-# import datetime
 import logging
 import requests
-# from celery.decorators import task
+from celery.decorators import task
 from django.conf import settings
-# from django.utils.timezone import now
-# from .models import ServerProfile
+from django.core import management
 
 logger = logging.getLogger('celery')
 
 
-# @task(name='notify_guild_app')
-# def notify_guild_app(app_id):
-#     logger.info('notify_guild_app: executed')
-#     app = GuildApplicants.objects.get(id=app_id)
-#     message = ('New Guild Application: **{char_name} - {char_role}**\n'
-#                'Warcraft Logs: {warcraft_logs}\n'
-#                'Raid Experience:```\n{raid_exp}\n```').format(**app.__dict__)
-#     send_discord_message(settings.BLUE_DISCORD_APP_CHANNEL, message)
-#     return 'Finished'
+@task(autoretry_for=(Exception,))
+def clear_sessions():
+    return management.call_command('clearsessions')
 
 
 def send_discord_message(channel_id, message):
