@@ -21,8 +21,10 @@ def home_view(request):
     # View  /
     """
     if 'server_list' not in request.session and request.user.is_authenticated:
+        logger.debug('server_list: from DISCORD - api call')
         request.session['server_list'] = get_discord_servers(request.user)
     if 'server_list' in request.session:
+        logger.debug('server_list: from session')
         data = {'server_list': request.session['server_list']}
     else:
         data = {}
