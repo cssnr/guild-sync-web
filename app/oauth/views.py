@@ -41,11 +41,10 @@ def oauth_callback(request):
     except Exception as error:
         logger.exception(error)
         messages.error(request, f'Exception during login: {error}')
-
     next_url = '/'
     if 'login_redirect_url' in request.session:
         next_url = request.session['login_redirect_url']
-    logger.debug('next_url: %s', next_url)
+    logger.debug('login_redirect_url: %s', next_url)
     return HttpResponseRedirect(next_url)
 
 
@@ -56,10 +55,10 @@ def log_out(request):
     """
     next_url = get_next_url(request)
     # Hack to prevent login loop when logging out on a secure page
-    # This probably needs to be improved and may not work as expected
-    if next_url.strip('/') in ['profile']:
+    logger.debug('next_url: %s', next_url.split('/')[1])
+    if next_url.split('/')[1] in ['profile', 'server']:
         next_url = '/'
-    logger.debug('next_url: %s', next_url)
+    logger.debug('login_next_url: %s', next_url)
     request.session['login_next_url'] = next_url
     logout(request)
     return redirect(next_url)
