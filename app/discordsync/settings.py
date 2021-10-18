@@ -120,6 +120,7 @@ if DEBUG:
 
     DEBUG_TOOLBAR_CONFIG = {'SHOW_TOOLBAR_CALLBACK': show_toolbar}
 
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
