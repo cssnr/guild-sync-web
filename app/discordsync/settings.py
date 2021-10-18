@@ -65,9 +65,8 @@ CELERY_BEAT_SCHEDULE = {
 
 CACHES = {
     'default': {
-        'BACKEND': os.getenv('CACHE_BACKEND',
-                             'django.core.cache.backends.locmem.LocMemCache'),
-        'LOCATION': os.getenv('CACHE_LOCATION', 'memcached:11211'),
+        'BACKEND': os.getenv('CACHE_BACKEND', 'django.core.cache.backends.locmem.LocMemCache'),
+        'LOCATION': os.getenv('CACHE_LOCATION', 'localhost:11211'),
         'OPTIONS': {
             'server_max_value_length': 1024 * 1024 * 4,
         }
