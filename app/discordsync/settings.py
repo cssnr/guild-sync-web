@@ -75,7 +75,8 @@ CELERY_BEAT_SCHEDULE = {
 
 CACHES = {
     'default': {
-        'BACKEND': os.getenv('CACHE_BACKEND', 'django.core.cache.backends.locmem.LocMemCache'),
+        'BACKEND': os.getenv('CACHE_BACKEND',
+                             'django.core.cache.backends.locmem.LocMemCache'),
         'LOCATION': os.getenv('CACHE_LOCATION', 'localhost:11211'),
         'OPTIONS': {
             'server_max_value_length': 1024 * 1024 * 4,
@@ -191,20 +192,5 @@ TEMPLATES = [
                 'django.template.context_processors.static',
             ],
         },
-    },
-]
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
