@@ -106,6 +106,7 @@ def get_user_profile(access_token):
     headers = {
         'Authorization': 'Bearer {}'.format(access_token),
     }
+    logger.debug('API CALL')
     r = requests.get(url, headers=headers, timeout=10)
     logger.debug('status_code: %s', r.status_code)
     logger.debug('content: %s', r.content)

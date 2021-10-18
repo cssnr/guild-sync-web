@@ -3,6 +3,7 @@ import requests
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.cache import cache
 from django.http import JsonResponse
 from django.shortcuts import HttpResponseRedirect, render
 from django.urls import reverse
@@ -21,7 +22,6 @@ def home_view(request):
     # View  /
     """
     if 'server_list' not in request.session and request.user.is_authenticated:
-        logger.debug('server_list: from DISCORD - api call')
         request.session['server_list'] = get_discord_servers(request.user)
     if 'server_list' in request.session:
         logger.debug('server_list: from session')
@@ -84,12 +84,15 @@ def server_view(request, serverid):
         server_data = get_server_by_id(request, serverid)
         logger.debug(server_data)
         if server_profile and server_profile.is_enabled:
-            enabled = check_guild_user(serverid, settings.DISCORD_BOT_USER_ID)
+            enabled = cache.get(serverid)
+            logger.debug('CACHE RESPONSE: %s', enabled)
+            if enabled is None:
+                enabled = check_guild_user(serverid, settings.DISCORD_BOT_USER_ID)
+                cache.set(serverid, enabled, 15)
             if not enabled:
                 server_profile.is_enabled = False
                 server_profile.save()
-                msg = 'Bot has been removed from server and must be re-enabled.'
-                messages.add_message(request, messages.WARNING, msg, extra_tags='warning')
+                messages.warning(request, 'Bot has been removed from server and must be re-enabled.')
         data = {'server_data': server_data, 'server_profile': server_profile}
         request.session['last_server'] = serverid
         return render(request, 'server.html', data)
@@ -117,7 +120,7 @@ def callback_view(request):
             server_profile.is_enabled = True
             server_profile.save()
 
-            messages.add_message(request, messages.SUCCESS, 'Bot Added Successfully!', extra_tags='success')
+            messages.success(request, 'Bot successfully added to server.')
 
             r_url = reverse('home:server', kwargs={'serverid': guild_id})
             logger.debug('r_url: %s', r_url)
@@ -127,19 +130,18 @@ def callback_view(request):
             # known error adding bot
             logger.warning(request.GET['error'])
             logger.warning(request.GET['error_description'])
-            full_error = '{}: {}'.format(request.GET['error'], request.GET['error_description'])
-            messages.add_message(request, messages.ERROR, full_error, extra_tags='danger')
+            messages.error(request, '{}: {}'.format(request.GET['error'], request.GET['error_description']))
         else:
             # unknown error adding bot
             logger.error('Error: unknown callback response.')
-            messages.add_message(request, messages.ERROR, 'Error: unknown callback response.', extra_tags='danger')
+            messages.error(request, 'Error: unknown callback response.')
         r_url = reverse('home:server', kwargs={'serverid': request.session['last_server']})
         logger.debug('r_url: %s', r_url)
         return HttpResponseRedirect(r_url)
 
     except Exception as error:
         logger.exception(error)
-        messages.add_message(request, messages.ERROR, 'Fatal Unknown Error.', extra_tags='danger')
+        messages.error(request, 'Unknown Fatal Error!')
         return HttpResponseRedirect('/')
 
 
@@ -148,6 +150,7 @@ def get_discord_servers(user):
     headers = {
         'Authorization':  'Bearer {}'.format(user.access_token),
     }
+    logger.debug('API CALL')
     r = requests.get(url, headers=headers, timeout=6)
     if not r.ok:
         r.raise_for_status()
@@ -169,6 +172,7 @@ def check_guild_user(serverid, userid):
     headers = {
         'Authorization': 'Bot {}'.format(settings.DISCORD_BOT_TOKEN),
     }
+    logger.debug('API CALL')
     r = requests.get(url, headers=headers, timeout=10)
     if not r.ok:
         logger.debug('r.status_code: %s', r.status_code)
