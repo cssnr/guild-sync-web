@@ -1,3 +1,4 @@
+import json
 import logging
 import requests
 from django.conf import settings
@@ -5,8 +6,10 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.cache import cache
 from django.http import JsonResponse
-from django.shortcuts import HttpResponseRedirect, render
+from django.shortcuts import render, HttpResponseRedirect, HttpResponse
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 from .forms import ServerForm
 from .models import ServerProfile
 
@@ -27,6 +30,9 @@ def home_view(request):
             logger.error(server_list.content)
             messages.warning(request, 'Error getting server list from Discord API.')
             return render(request, 'home.html')
+        logger.debug('server_list: %s', server_list)
+        request.user.server_list = get_server_id_list(server_list)
+        logger.debug('request.user.server_list: %s', request.user.server_list)
         request.session['server_list'] = server_list
     if 'server_list' in request.session:
         logger.debug('server_list: from session')
@@ -163,6 +169,37 @@ def callback_view(request):
         return HttpResponseRedirect('/')
 
 
+@csrf_exempt
+@require_http_methods(['POST'])
+def client_auth(request):
+    """
+    # View  /auth/
+    """
+    logger.debug(request.body)
+    return HttpResponse('winning')
+
+
+@csrf_exempt
+@require_http_methods(['POST'])
+def client_upload(request):
+    """
+    # View  /upload/
+    """
+    data = json.loads(request.body)
+    logger.debug(data)
+    # GUILD_LIST = "Blue Team-Faerlina"
+    # USER_DICT = {}
+    # for guild in d['guilds']:
+    #     if guild in GUILD_LIST:
+    #         print('Starting guild: %s' % guild)
+    #         for user, note in d['guilds'][guild].items():
+    #             match = re.search('^.{3,32}#[0-9]{4}$', note)
+    #             if match:
+    #                 USER_DICT[match.group(0)] = user
+    #         print(USER_DICT)
+    return HttpResponse('winning')
+
+
 def get_user_servers(access_token):
     url = '{}/users/@me/guilds'.format(settings.DISCORD_API_URL)
     r = discord_api_call(url, access_token, tt='Bearer')
@@ -209,6 +246,13 @@ def get_server_by_id(request, serverid):
             return server
     logger.warning('NO Matching Servers!')
     return None
+
+
+def get_server_id_list(server_list):
+    server_id_list = []
+    for server in server_list:
+        server_id_list.append(server['id'])
+    return server_id_list
 
 
 def discord_api_call(url, token, tt='Bot'):
