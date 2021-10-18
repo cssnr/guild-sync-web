@@ -69,17 +69,17 @@
                             {% if request.user.is_superuser %}
                                 <div class="dropdown-divider"></div>
 
-                                <a class="dropdown-item" href="{% url 'admin:index' %}">
+                                <a class="dropdown-item text-warning" href="{% url 'admin:index' %}">
                                     <i class="fas fa-tools mr-2"></i> Admin</a>
 
-                                <a class="dropdown-item" href="{% url 'flower' %}" target="_blank">
+                                <a class="dropdown-item text-warning" href="{% url 'flower' %}" target="_blank">
                                     <i class="fas fa-seedling mr-2"></i> Flower
                                     <i class="fas fa-external-link-alt ml-2"></i></a>
                             {% endif %}
 
                             <div class="dropdown-divider"></div>
 
-                            <a class="dropdown-item log-out" href="#">
+                            <a class="dropdown-item log-out text-danger" href="#">
                                 <i class="fas fa-sign-out-alt mr-2"></i>Log Out</a>
                         </div>
                     </li>

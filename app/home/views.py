@@ -22,7 +22,7 @@ def home_view(request):
     # View  /
     """
     if 'server_list' not in request.session and request.user.is_authenticated:
-        request.session['server_list'] = get_discord_servers(request.user)
+        request.session['server_list'] = get_user_servers(request.user.access_token)
     if 'server_list' in request.session:
         logger.debug('server_list: from session')
         data = {'server_list': request.session['server_list']}
@@ -145,23 +145,37 @@ def callback_view(request):
         return HttpResponseRedirect('/')
 
 
-def get_discord_servers(user):
+def get_user_servers(access_token):
     url = '{}/users/@me/guilds'.format(settings.DISCORD_API_URL)
-    headers = {
-        'Authorization':  'Bearer {}'.format(user.access_token),
-    }
-    logger.debug('API CALL')
-    r = requests.get(url, headers=headers, timeout=6)
-    if not r.ok:
-        r.raise_for_status()
-    j = r.json()
-    logger.debug(j)
+    j = discord_api_call(url, access_token, tt='Bearer')
     server_list = []
     for server in j:
         if server['permissions'] == 2147483647:
             server_list.append(server)
     logger.debug(server_list)
     return server_list
+
+
+def get_guild_roles(serverid):
+    url = '{}/guilds/{}/roles'.format(settings.DISCORD_API_URL, serverid)
+    j = discord_api_call(url, settings.DISCORD_BOT_TOKEN)
+    role_list = []
+    for role in j:
+        if not role['managed']:
+            role_list.append(role)
+    logger.debug(role_list)
+    return role_list
+
+
+def get_guild_channels(serverid):
+    url = '{}/guilds/{}/channels'.format(settings.DISCORD_API_URL, serverid)
+    j = discord_api_call(url, settings.DISCORD_BOT_TOKEN)
+    channels_list = []
+    for channel in j:
+        if channel['type'] == 0:
+            channels_list.append(channel)
+    logger.debug(channels_list)
+    return channels_list
 
 
 def check_guild_user(serverid, userid):
@@ -173,7 +187,7 @@ def check_guild_user(serverid, userid):
         'Authorization': 'Bot {}'.format(settings.DISCORD_BOT_TOKEN),
     }
     logger.debug('API CALL')
-    r = requests.get(url, headers=headers, timeout=10)
+    r = requests.get(url, headers=headers, timeout=6)
     if not r.ok:
         logger.debug('r.status_code: %s', r.status_code)
         logger.debug('r.content: %s', r.content)
@@ -188,3 +202,14 @@ def get_server_by_id(request, serverid):
             return server
     logger.warning('NO Matching Servers!')
     return None
+
+
+def discord_api_call(url, token, tt='Bot'):
+    logger.info('discord_api_call')
+    headers = {'Authorization': '{} {}'.format(tt, token)}
+    r = requests.get(url, headers=headers, timeout=6)
+    if not r.ok:
+        r.raise_for_status()
+    j = r.json()
+    logger.debug(j)
+    return j
