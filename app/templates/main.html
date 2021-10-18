@@ -6,21 +6,23 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    {% get_config "DEBUG" as debug_enabled %}
-    {% if debug_enabled %}<meta name="robots" content="noindex, nofollow">{% endif %}
-
-    <meta name="author" content="Shane"/>
-    <meta name="title" content="Discord Guild Sync"/>
-    <meta name="description" content="Discord Guild Sync - A Discord Guild Sync for World of Warcraft Classic."/>
-
-    <meta property="og:author" content="Shane">
-    <meta property="og:title" content="Discord Guild Sync">
-    <meta property="og:description" content="Discord Guild Sync - A Discord Guild Sync for World of Warcraft Classic.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="{{ request.scheme }}://{{ request.META.HTTP_HOST }}{% url 'home:index' %}">
-    <meta property="og:image" content="{{ request.scheme }}://{{ request.META.HTTP_HOST }}{% static 'images/logo.png' %}">
+    {% get_config "DEBUG" as debug_enabled %}{% if debug_enabled %}
+        <meta name="robots" content="noindex, nofollow">{% endif %}
 
     <title>Discord Guild Sync - {% block title %}{% endblock %}</title>
+
+    {% block meta %}
+        <meta name="author" content="Shane"/>
+        <meta name="title" content="Discord Guild Sync"/>
+        <meta name="description" content="Discord Guild Sync - A Discord Guild Sync for World of Warcraft Classic."/>
+
+        <meta property="og:author" content="Shane">
+        <meta property="og:title" content="Discord Guild Sync">
+        <meta property="og:description" content="Discord Guild Sync - A Discord Guild Sync for World of Warcraft Classic.">
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="{{ request.scheme }}://{{ request.META.HTTP_HOST }}{% url 'home:index' %}">
+        <meta property="og:image" content="{{ request.scheme }}://{{ request.META.HTTP_HOST }}{% static 'images/logo.png' %}">
+    {% endblock %}
 
     <link rel="icon" href="{% static 'images/favicon.ico' %}">
 
@@ -32,95 +34,138 @@
 </head>
 <body>
 
-<div class="container-fluid">
-    {% block heading %}
-        <nav class="navbar navbar-expand-md navbar-dark bg-dark mt-2">
-            <a class="navbar-brand" href="{% url 'home:index' %}">{{ site_title_short }}</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor"
-                    aria-controls="navbarColor" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarColor">
-                <ul class="navbar-nav mr-auto">
-                    <li class="nav-item {% block home_active %}{% endblock %}">
-                        <a class="nav-link" href="{% url 'home:index' %}">Home</a>
-                    </li>
-                    <li class="nav-item {% block news_active %}{% endblock %}">
-                        <a class="nav-link" href="{% url 'home:news' %}">News</a>
-                    </li>
+{% block navbar %}
+    <nav class="navbar navbar-dark bg-dark navbar-expand-md">
+        <a class="navbar-brand" href="{% url 'home:index' %}">
+            <img src="{% static 'images/logo.png' %}" width="30" height="30" alt="LVF"></a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupport"
+                aria-controls="navbarSupport" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupport"> <!-- Navbar START -->
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item {% block home_active %}{% endblock %}">
+                    <a href="{% url 'home:index' %}" class="nav-link">Home</a>
+                </li>
+                <li class="nav-item {% block news_active %}{% endblock %}">
+                    <a href="{% url 'home:news' %}" class="nav-link">News</a>
+                </li>
+            </ul>
+
+            {% if request.user.is_authenticated %}
+                <ul class="navbar-nav ml-auto">
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown"
-                           role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Resources</a>
+                        <a href="#" id="navbarDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="nav-link">
+                            <i class="fas fa-angle-down d-none d-md-inline d-lg-inline d-xl-inline mr-1"></i>
+                            {% if user.first_name %}{{ user.first_name }}{% else %}{{ user.username }}{% endif %}
+                            <i class="fas fa-angle-down d-md-none d-lg-none d-xl-none ml-1"></i>
+                            <img src="{% if user.avatar_hash %}https://cdn.discordapp.com/avatars/{{ user.discord_id }}/{{ user.avatar_hash }}.png{% else %}{% static 'images/assets/default-user.png' %}{% endif %}"
+                                 class="rounded-circle mx-2 d-none d-md-inline d-lg-inline d-xl-inline" height="31" width="31" alt="P"></a>
+
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="https://discord.com/developers/applications" target="_blank">
-                                Discord Developer Portal</a>
+                            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#user-info-modal">
+                                <i class="fas fa-user-circle mr-2"></i> Profile</a>
+
+                            {% if request.user.is_superuser %}
+                                <div class="dropdown-divider"></div>
+
+                                <a class="dropdown-item" href="{% url 'admin:index' %}">
+                                    <i class="fas fa-tools mr-2"></i> Admin</a>
+
+                                <a class="dropdown-item" href="{% url 'flower' %}" target="_blank">
+                                    <i class="fas fa-seedling mr-2"></i> Flower
+                                    <i class="fas fa-external-link-alt ml-2"></i></a>
+                            {% endif %}
+
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="{% get_config "DISCORD_URL" %}" target="_blank">
-                                Join our Discord</a>
+
+                            <a class="dropdown-item log-out" href="#">
+                                <i class="fas fa-sign-out-alt mr-2"></i>Log Out</a>
                         </div>
                     </li>
                 </ul>
+            {% else %}
+                <a href="{% url 'oauth:login' %}?next={{ request.path }}" class="btn btn-outline-primary" role="button">
+                        Log in with Discord <i class="fas fa-sign-in-alt"></i></a>
+            {% endif %}
 
-                {% if not request.user.is_authenticated %}
-                    {# Not Authenticated #}
-                    <a href="{% url 'oauth:login' %}?next={{ request.path }}" class="btn btn-outline-info" role="button">
-                        Log in with Discord
-                        <i class="fas fa-sign-in-alt"></i></a>
+            <div class="d-md-none d-lg-none d-xl-none mt-2"></div>
+        </div> <!-- Navbar END -->
+    </nav>
+{% endblock %}
 
-                {% else %}
-                    {# Logged In #}
-                    <a href="{% url 'home:profile' %}" class="text-info mr-3">
-                        {% if user.first_name %}{{ user.first_name }}{% else %}{{ user.username }}{% endif %}</a>
-                    {% if user.is_superuser %}
-                        <a href="{% url 'flower' %}" class="btn btn-outline-success mr-1" role="button" target="_blank">
-                            Flower <i class="fas fa-fan"></i></a>
-                    {% endif %}
-                    {% if user.is_staff %}
-                        <a href="{% url 'admin:index' %}" class="btn btn-outline-primary mr-1" role="button">
-                            Admin <i class="fas fa-rocket"></i></a>
-                    {% endif %}
-                    <a href="" class="log-out btn btn-outline-info" role="button">
-                        Log Out <i class="fas fa-sign-out-alt"></i></a>
-                {% endif %}
+<div class="container"> <!-- Container START -->
 
-            </div>
-        </nav>
-    {% endblock %}
-
-    {% block messages %}
-        <div class="row mt-2">
-            <div class="col">
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-{{ message.extra_tags }} alert-dismissible fade show my-1" role="alert">
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                <span aria-hidden="true">&times;</span></button>
-                            {{ message.message }}
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            </div>
-        </div>
-    {% endblock %}
+    {% block messages %}{% if messages %}{% for message in messages %}
+    <div class="alert alert-{{ message.tags|tag_to_class }} alert-dismissible fade show mt-2" role="alert">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    {% endfor %}{% endif %}{% endblock %}
 
     {% block body %}{% endblock %}
 
     {% block footer %}{% endblock %}
-</div>
+
+</div> <!-- Container END -->
 
 {% if request.user.is_authenticated %}
     <form id="log-out" action="{% url 'oauth:logout' %}" method="POST">
         {% csrf_token %}
         <input type="hidden" name="next" value="{{ request.get_full_path }}">
     </form>
+
+    <div class="modal fade" id="user-info-modal" tabindex="-1" aria-labelledby="user-info-modal-label" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="user-info-modal-label">
+                        <i class="fas fa-user-circle mr-2"></i> Profile</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <img src="{% if user.avatar_hash %}https://cdn.discordapp.com/avatars/{{ user.discord_id }}/{{ user.avatar_hash }}.png{% else %}{% static 'images/default-user.png' %}{% endif %}"
+                         class="rounded float-right m-2" style="max-height:128px;max-width:128px;" alt="Profile Picture">
+                    <h4 class="modal-title">{% if user.first_name %}{{ user.first_name }}{% else %}{{ user.username }}{% endif %}</h4>
+                    <p>Information provided by Discord.</p>
+                    <p></p>
+                    <div class="clearfix"></div>
+                    <table class="table mt-2">
+                        <tbody>
+                        <tr>
+                            <th>Discord ID</th>
+                            <td>{{ user.discord_id }}</td>
+                        </tr>
+                        <tr>
+                            <th>Discord Username</th>
+                            <td>{{ user.discord_username }}#{{ user.discriminator }}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <a href="https://discord.com/login" class="btn btn-primary" role="button" target="_blank">
+                        Open in Discord <i class="fas fa-external-link-alt ml-2"></i></a>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        Close <i class="fas fa-times ml-2"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endif %}
 
-<script type="text/javascript" src="{% static 'jquery/jquery.min.js' %}"></script>
-<script type="text/javascript" src="{% static 'popper/popper.min.js' %}"></script>
-<script type="text/javascript" src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
-<script type="text/javascript" src="{% static 'font-awesome/js/all.min.js' %}"></script>
-<script type="text/javascript" src="{% static 'main/js/main.js' %}"></script>
+{% block js %}
+    <script type="text/javascript" src="{% static 'jquery/jquery.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'popper/popper.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'font-awesome/js/all.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'clipboardjs/clipboard.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'main/js/main.js' %}"></script>
+{% endblock %}
 
 {% block tail %}{% endblock %}
 

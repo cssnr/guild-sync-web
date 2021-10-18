@@ -1,23 +1,23 @@
 import logging
 import requests
 import urllib.parse
-from django.contrib.auth import login, logout
-# from django.contrib.auth.models import Group
-from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import redirect
-from django.shortcuts import HttpResponseRedirect, HttpResponse
-from django.views.decorators.http import require_http_methods
 from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth import login, logout
+from django.core.exceptions import ObjectDoesNotExist
+from django.shortcuts import HttpResponseRedirect, redirect
+from django.views.decorators.http import require_http_methods
 from .models import CustomUser
 
 logger = logging.getLogger('app')
 
 
-def do_oauth(request):
+def start_oauth(request):
     """
     # View  /oauth/
     """
     request.session['login_redirect_url'] = get_next_url(request)
+    logger.debug('login_redirect_url: %s', request.session['login_redirect_url'])
     params = {
         'client_id': settings.OAUTH_CLIENT_ID,
         'redirect_uri': settings.OAUTH_REDIRECT_URI,
@@ -34,23 +34,18 @@ def oauth_callback(request):
     # View  /oauth/callback/
     """
     try:
-        oauth_code = request.GET['code']
-        access_token = get_access_token(oauth_code)
+        access_token = get_access_token(request.GET['code'])
         user_profile = get_user_profile(access_token)
-        auth = login_user(request, user_profile)
-        if not auth:
-            err_msg = 'Unable to complete login process. Report as a Bug.'
-            return HttpResponse(err_msg, content_type='text/plain')
-        try:
-            next_url = request.session['login_redirect_url']
-        except Exception:
-            next_url = '/'
-        return HttpResponseRedirect(next_url)
-
+        user = login_user(request, user_profile['django_username'], user_profile)
+        messages.info(request, f'Successfully logged in as {user.first_name}.')
     except Exception as error:
         logger.exception(error)
-        err_msg = 'Fatal Login Error. Report as Bug: %s' % error
-        return HttpResponse(err_msg, content_type='text/plain')
+        messages.error(request, f'Exception during login: {error}')
+    next_url = '/'
+    if 'login_redirect_url' in request.session:
+        next_url = request.session['login_redirect_url']
+    logger.debug('login_redirect_url: %s', next_url)
+    return HttpResponseRedirect(next_url)
 
 
 @require_http_methods(['POST'])
@@ -59,37 +54,28 @@ def log_out(request):
     View  /oauth/logout/
     """
     next_url = get_next_url(request)
-
     # Hack to prevent login loop when logging out on a secure page
-    # This probably needs to be improved and may not work as expected
-    if next_url.strip('/') in ['profile']:
+    logger.debug('next_url: %s', next_url.split('/')[1])
+    if next_url.split('/')[1] in ['profile', 'server']:
         next_url = '/'
-    logger.debug('next_url: %s', next_url)
-
+    logger.debug('login_next_url: %s', next_url)
     request.session['login_next_url'] = next_url
     logout(request)
     return redirect(next_url)
 
 
-def login_user(request, user_profile):
+def login_user(request, username, profile):
     """
-    Login or Create New User
+    Login or create user
     """
     try:
-        user = CustomUser.objects.get(username=user_profile['django_username'])
-        user = update_profile(user, user_profile)
-        user.save()
-        login(request, user)
-        return True
+        user = CustomUser.objects.get(username=username)
     except ObjectDoesNotExist:
-        user = CustomUser.objects.create_user(user_profile['django_username'])
-        user = update_profile(user, user_profile)
-        user.save()
-        login(request, user)
-        return True
-    except Exception as error:
-        logger.exception(error)
-        return False
+        user = CustomUser.objects.create_user(username)
+    user = update_profile(user, profile)
+    user.save()
+    login(request, user)
+    return user
 
 
 def get_access_token(code):
@@ -119,24 +105,11 @@ def get_user_profile(access_token):
     headers = {
         'Authorization': 'Bearer {}'.format(access_token),
     }
+    logger.debug('API CALL')
     r = requests.get(url, headers=headers, timeout=10)
     logger.debug('status_code: %s', r.status_code)
     logger.debug('content: %s', r.content)
     user_profile = r.json()
-
-    # url = '{}/guilds/{}/members/{}'.format(
-    #     settings.DISCORD_API_URL,
-    #     settings.BLUE_DISCORD_ID,
-    #     user_profile['id'],
-    # )
-    # headers = {
-    #     'Authorization': 'Bot {}'.format(settings.BLUE_DISCORD_BOT_TOKEN),
-    # }
-    # r = requests.get(url, headers=headers, timeout=10)
-    # logger.debug('status_code: %s', r.status_code)
-    # logger.debug('content: %s', r.content)
-    # user_guild = r.json()
-
     return {
         'id': user_profile['id'],
         'username': user_profile['username'],
@@ -151,14 +124,6 @@ def update_profile(user, user_profile):
     """
     Update Django user profile with provided data
     """
-
-    # officers = Group.objects.get(name='Officers')
-    # logger.debug('blue_team_officer: %s', user_profile['blue_team_officer'])
-    # if user_profile['blue_team_officer']:
-    #     officers.user_set.add(user)
-    # else:
-    #     officers.user_set.remove(user)
-
     user.first_name = user_profile['username']
     user.last_name = user_profile['discriminator']
     user.discord_username = user_profile['username']
@@ -171,18 +136,12 @@ def update_profile(user, user_profile):
 
 def get_next_url(request):
     """
-    Determine 'next' Parameter
+    Determine 'next' parameter
     """
-    try:
-        next_url = request.GET['next']
-    except Exception:
-        try:
-            next_url = request.POST['next']
-        except Exception:
-            try:
-                next_url = request.session['login_next_url']
-            except Exception:
-                next_url = '/'
-    if not next_url:
-        next_url = '/'
-    return next_url
+    if 'next' in request.GET:
+        return request.GET['next']
+    if 'next' in request.POST:
+        return request.POST['next']
+    if 'next_url' in request.session:
+        return request.session['next_url']
+    return '/'

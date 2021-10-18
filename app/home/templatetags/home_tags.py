@@ -1,7 +1,7 @@
 import urllib.parse
 from django import template
 from django.conf import settings
-from django.urls import reverse
+# from django.urls import reverse
 
 # import logging
 # logger = logging.getLogger('app')
@@ -15,6 +15,24 @@ def get_config(value):
         return getattr(settings, value)
     except:
         return None
+
+
+@register.filter(name='tag_to_class')
+def tag_to_class(value):
+    return {
+        'info': 'primary',
+        'success': 'success',
+        'warning': 'warning',
+        'error': 'danger',
+    }[value]
+
+
+@register.filter(name='theme_css')
+def theme_css(value=None):
+    if value not in settings.SITE_THEMES:
+        value = 'default'
+    theme = settings.SITE_THEMES[value]
+    return theme['css']
 
 
 @register.simple_tag(name='get_bot_url')

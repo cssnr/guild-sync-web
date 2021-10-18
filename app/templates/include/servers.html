@@ -11,8 +11,7 @@
                      {% else %}
                         src="{% static 'images/assets/server-placeholder.png' %}"
                      {% endif %}
-                     alt="{{ server.name }}">
-            </a>
+                     alt="{{ server.name }}"></a>
             <a href="{% url 'home:server' serverid=server.id %}">
                 <p>{{ server.name }}</p></a>
         </div>
