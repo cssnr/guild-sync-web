@@ -12,6 +12,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from .forms import ServerForm
 from .models import ServerProfile
+from .tasks import process_upload
+from oauth.models import CustomUser
 
 logger = logging.getLogger('app')
 
@@ -32,6 +34,7 @@ def home_view(request):
             return render(request, 'home.html')
         logger.debug('server_list: %s', server_list)
         request.user.server_list = get_server_id_list(server_list)
+        request.user.save()
         logger.debug('request.user.server_list: %s', request.user.server_list)
         request.session['server_list'] = server_list
     if 'server_list' in request.session:
@@ -175,8 +178,13 @@ def client_auth(request):
     """
     # View  /auth/
     """
-    logger.debug(request.body)
-    return HttpResponse('winning')
+    try:
+        access_key = request.headers['Access-Key']
+        user = CustomUser.objects.get(access_key=access_key)
+        return HttpResponse('Logged in as: %s' % user.username)
+    except Exception as error:
+        logger.info(error)
+        return HttpResponse('auth-fail')
 
 
 @csrf_exempt
@@ -185,19 +193,17 @@ def client_upload(request):
     """
     # View  /upload/
     """
-    data = json.loads(request.body)
-    logger.debug(data)
-    # GUILD_LIST = "Blue Team-Faerlina"
-    # USER_DICT = {}
-    # for guild in d['guilds']:
-    #     if guild in GUILD_LIST:
-    #         print('Starting guild: %s' % guild)
-    #         for user, note in d['guilds'][guild].items():
-    #             match = re.search('^.{3,32}#[0-9]{4}$', note)
-    #             if match:
-    #                 USER_DICT[match.group(0)] = user
-    #         print(USER_DICT)
-    return HttpResponse('winning')
+    try:
+        access_key = request.headers['Access-Key']
+        user = CustomUser.objects.get(access_key=access_key)
+        data = json.loads(request.body)
+        logger.debug(data)
+        process_upload.delay(user.pk, data)
+
+        return HttpResponse('success')
+    except Exception as error:
+        logger.info(error)
+        return HttpResponse('auth-fail')
 
 
 def get_user_servers(access_token):
