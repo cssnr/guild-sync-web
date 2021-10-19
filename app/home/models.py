@@ -10,6 +10,7 @@ class ServerProfile(models.Model):
     guild_role = models.CharField(blank=True, max_length=32, verbose_name='Discord Guild Role')
     alert_channel = models.CharField(blank=True, max_length=32, verbose_name='Discord Alerts Channel')
     server_notes = models.TextField(blank=True, verbose_name='Server Notes')
+    sync_method = models.CharField(default=False, max_length=32, verbose_name='Sync Method')
     sync_classes = models.BooleanField(default=False, verbose_name='Sync Class Roles')
     is_enabled = models.BooleanField(default=False, verbose_name='Server Enable Status')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -17,7 +18,7 @@ class ServerProfile(models.Model):
     objects = ServerProfileManager()
 
     def __str__(self):
-        return '{} ({})'.format(self.server_name, self.server_id)
+        return '{} - {}'.format(self.server_id, self.server_name)
 
     class Meta:
         verbose_name = 'Server Profile'

@@ -1,5 +1,10 @@
 from django import forms
 
+SYNC_OPTIONS = [
+    ('user', 'User Based'),
+    ('note', 'Note Based'),
+]
+
 
 class ServerForm(forms.Form):
     guild_name = forms.CharField(max_length=64)
@@ -8,3 +13,6 @@ class ServerForm(forms.Form):
     alert_channel = forms.CharField(max_length=32, required=False)
     server_notes = forms.CharField(required=False)
     sync_classes = forms.BooleanField(required=False)
+    sync_method = forms.MultipleChoiceField(
+        choices=SYNC_OPTIONS,
+    )

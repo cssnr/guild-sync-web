@@ -29,13 +29,26 @@
                 <form id="update-server-form" name="update-server-form" method="POST" action="{% url 'home:server' server_data.id %}">
                     {% csrf_token %}
                     <div class="form-row">
-                        <div class="form-group col-lg-6 col-md-4">
+                        <div class="form-group col-lg-6 col-md-6">
+                            <label for="sync_method">Discord Guild Role</label>
+                            <select id="sync_method" name="sync_method" class="form-control custom-select">
+                                <option value="">-- Select Sync Method --</option>
+                                <option value="user" {% if server_profile.sync_method == 'user' %}selected{% endif %}>
+                                    Name Based</option>
+                                <option value="note" {% if server_profile.sync_method == 'note' %}selected{% endif %}>
+                                    Note Based</option>
+                            </select>
+                            <div class="invalid-feedback" id="sync_method-invalid"></div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-lg-6 col-md-6">
                             <label for="guild_name">Guild Name (in-game)</label>
                             <input type="text" class="form-control" id="guild_name" name="guild_name" placeholder="Guild Name"
                                 {% if server_profile.guild_name %}value="{{ server_profile.guild_name }}"{% endif %}>
                             <div class="invalid-feedback" id="guild_name-invalid"></div>
                         </div>
-                        <div class="form-group col-lg-4 col-md-4">
+                        <div class="form-group col-lg-6 col-md-6">
                             <label for="guild_realm">Guild Realm (in-game)</label>
                             <input type="text" class="form-control" id="guild_realm" name="guild_realm" placeholder="Guild Realm"
                                 {% if server_profile.guild_realm %}value="{{ server_profile.guild_realm }}"{% endif %}>
@@ -43,7 +56,7 @@
                         </div>
                     </div>
                     <div class="form-row">
-                        <div class="form-group col-lg-6 col-md-4">
+                        <div class="form-group col-lg-6 col-md-6">
                             <label for="guild_role">Discord Guild Role</label>
                             <select id="guild_role" name="guild_role" class="form-control custom-select">
                                 <option value="">-- Select Role --</option>
@@ -54,13 +67,13 @@
                             </select>
                             <div class="invalid-feedback" id="guild_role-invalid"></div>
                         </div>
-                        <div class="form-group col-lg-4 col-md-4">
+                        <div class="form-group col-lg-6 col-md-6">
                             <label for="alert_channel">Alerts Channel</label>
                             <select id="alert_channel" name="alert_channel" class="form-control custom-select">
                                 <option value="">-- Select Channel --</option>
                                 {% for channel in channels %}
                                     <option value="{{ channel.1 }}" {% if server_profile.alert_channel == channel.1 %}selected{% endif %}>
-                                        {{ channel.0 }}</option>
+                                        #{{ channel.0 }}</option>
                                 {% endfor %}
                             </select>
                             <div class="invalid-feedback" id="alert_channel-invalid"></div>
