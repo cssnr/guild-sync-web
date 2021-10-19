@@ -12,7 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from .forms import ServerForm
 from .models import ServerProfile
-from .tasks import process_upload
+from .tasks import process_upload, discord_api_call
 from oauth.models import CustomUser
 
 logger = logging.getLogger('app')
@@ -26,6 +26,7 @@ def home_view(request):
     """
     # View  /
     """
+    # this needs to move to login - is a bug
     if 'server_list' not in request.session and request.user.is_authenticated:
         server_list = get_user_servers(request.user.access_token)
         if isinstance(server_list, requests.models.Response):
@@ -45,11 +46,11 @@ def home_view(request):
     return render(request, 'home.html', data)
 
 
-def news_view(request):
+def about_view(request):
     """
-    # View  /news/
+    # View  /about/
     """
-    return render(request, 'news.html')
+    return render(request, 'about.html')
 
 
 @login_required
@@ -119,6 +120,7 @@ def server_view(request, serverid):
             server_profile.alert_channel = form.cleaned_data['alert_channel']
             server_profile.server_notes = form.cleaned_data['server_notes']
             server_profile.sync_classes = bool(form.cleaned_data['sync_classes'])
+            server_profile.sync_method = form.cleaned_data['sync_method'][0]
             server_profile.save()
             logger.debug('server_profile: save')
             return JsonResponse({}, status=200)
@@ -259,17 +261,6 @@ def get_server_id_list(server_list):
     for server in server_list:
         server_id_list.append(server['id'])
     return server_id_list
-
-
-def discord_api_call(url, token, tt='Bot'):
-    logger.info('discord_api_call')
-    headers = {'Authorization': '{} {}'.format(tt, token)}
-    return requests.get(url, headers=headers, timeout=6)
-    # if not r.ok:
-    #     r.raise_for_status()
-    # j = r.json()
-    # logger.debug(j)
-    # return j
 
 
 # def check_guild_user(serverid, userid):

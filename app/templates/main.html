@@ -47,8 +47,22 @@
                 <li class="nav-item {% block home_active %}{% endblock %}">
                     <a href="{% url 'home:index' %}" class="nav-link">Home</a>
                 </li>
-                <li class="nav-item {% block news_active %}{% endblock %}">
-                    <a href="{% url 'home:news' %}" class="nav-link">News</a>
+                <li class="nav-item {% block about_active %}{% endblock %}">
+                    <a href="{% url 'home:about' %}" class="nav-link">About</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown"
+                       role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Resources</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="https://github.com/cssnr/guild-sync-addon" target="_blank">
+                            Guild Sync Addon</a>
+                        <a class="dropdown-item" href="https://github.com/cssnr/guild-sync-client" target="_blank">
+                            Guild Sync Client</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="{% get_config "DISCORD_URL" %}" target="_blank">
+                            Join our Discord</a>
+                    </div>
                 </li>
             </ul>
 

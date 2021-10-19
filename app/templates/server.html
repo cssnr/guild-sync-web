@@ -33,7 +33,7 @@
                             <label for="sync_method">Discord Guild Role</label>
                             <select id="sync_method" name="sync_method" class="form-control custom-select">
                                 <option value="">-- Select Sync Method --</option>
-                                <option value="user" {% if server_profile.sync_method == 'user' %}selected{% endif %}>
+                                <option value="name" {% if server_profile.sync_method == 'name' %}selected{% endif %}>
                                     Name Based</option>
                                 <option value="note" {% if server_profile.sync_method == 'note' %}selected{% endif %}>
                                     Note Based</option>
@@ -96,6 +96,7 @@
                     <span style="display:none;" id="server_saved" class="text-success ml-3">
                         <i class="fas fa-check-circle"></i> Profile Saved</span>
                 </form>
+                <div class="mb-3"></div>
 
             {% endif %}
 

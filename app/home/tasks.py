@@ -28,8 +28,30 @@ def process_upload(user_pk, data):
         if query and query.server_id in user.server_list:
             logger.info('Matching Configuration - Processing...')
             logger.debug(query)
+            users = get_guild_users(query.server_id)
+            if query.sync_method == 'note':
+                logger.debug('Note Sync.')
+                for user in users:
+                    pass
+            elif query.sync_method == 'name':
+                logger.debug('Name Sync.')
+                pass
+            else:
+                logger.warning('Unknown sync_method: %s', query.sync_method)
+
         pass
     pass
+
+
+def get_guild_users(serverid):
+    url = '{}/guilds/{}/members'.format(settings.DISCORD_API_URL, serverid)
+    return discord_api_call(url, settings.DISCORD_BOT_TOKEN)
+
+
+def discord_api_call(url, token, tt='Bot'):
+    logger.info('discord_api_call')
+    headers = {'Authorization': '{} {}'.format(tt, token)}
+    return requests.get(url, headers=headers, timeout=6)
 
 
 def send_discord_message(channel_id, message):

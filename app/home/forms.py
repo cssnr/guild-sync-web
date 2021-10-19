@@ -1,7 +1,7 @@
 from django import forms
 
 SYNC_OPTIONS = [
-    ('user', 'User Based'),
+    ('name', 'Name Based'),
     ('note', 'Note Based'),
 ]
 

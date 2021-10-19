@@ -4,13 +4,13 @@ from distutils.util import strtobool
 from celery.schedules import crontab
 from sentry_sdk.integrations.django import DjangoIntegration
 
-sentry_sdk.init(
-    dsn=os.environ['SENTRY_URL'],
-    integrations=[DjangoIntegration()],
-    traces_sample_rate=float(os.getenv('SENTRY_SAMPLE_RATE', 1.0)),
-    send_default_pii=True,
-    debug=strtobool(os.getenv('DEBUG', 'False')),
-)
+# sentry_sdk.init(
+#     dsn=os.environ['SENTRY_URL'],
+#     integrations=[DjangoIntegration()],
+#     traces_sample_rate=float(os.getenv('SENTRY_SAMPLE_RATE', 1.0)),
+#     send_default_pii=True,
+#     debug=strtobool(os.getenv('DEBUG', 'False')),
+# )
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ROOT_URLCONF = 'discordsync.urls'
