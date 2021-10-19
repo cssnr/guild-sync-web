@@ -4,14 +4,6 @@ from distutils.util import strtobool
 from celery.schedules import crontab
 from sentry_sdk.integrations.django import DjangoIntegration
 
-# sentry_sdk.init(
-#     dsn=os.environ['SENTRY_URL'],
-#     integrations=[DjangoIntegration()],
-#     traces_sample_rate=float(os.getenv('SENTRY_SAMPLE_RATE', 1.0)),
-#     send_default_pii=True,
-#     debug=strtobool(os.getenv('DEBUG', 'False')),
-# )
-
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ROOT_URLCONF = 'discordsync.urls'
 WSGI_APPLICATION = 'discordsync.wsgi.application'
@@ -119,6 +111,15 @@ if DEBUG:
         return True if request.user.is_superuser else False
 
     DEBUG_TOOLBAR_CONFIG = {'SHOW_TOOLBAR_CALLBACK': show_toolbar}
+
+else:
+    sentry_sdk.init(
+        dsn=os.environ['SENTRY_URL'],
+        integrations=[DjangoIntegration()],
+        traces_sample_rate=float(os.getenv('SENTRY_SAMPLE_RATE', 1.0)),
+        send_default_pii=True,
+        debug=strtobool(os.getenv('DEBUG', 'False')),
+    )
 
 
 LOGGING = {

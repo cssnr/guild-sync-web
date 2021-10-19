@@ -199,7 +199,7 @@ def client_upload(request):
         access_key = request.headers['Access-Key']
         user = CustomUser.objects.get(access_key=access_key)
         data = json.loads(request.body)
-        logger.debug(data)
+        # logger.debug(data)
         process_upload.delay(user.pk, data)
 
         return HttpResponse('success')
@@ -209,7 +209,7 @@ def client_upload(request):
 
 
 def get_user_servers(access_token):
-    url = '{}/users/@me/guilds'.format(settings.DISCORD_API_URL)
+    url = f'{settings.DISCORD_API_URL}/users/@me/guilds'
     r = discord_api_call(url, access_token, tt='Bearer')
     if not r.ok:
         return r
@@ -222,7 +222,7 @@ def get_user_servers(access_token):
 
 
 def get_guild_roles(serverid):
-    url = '{}/guilds/{}/roles'.format(settings.DISCORD_API_URL, serverid)
+    url = f'{settings.DISCORD_API_URL}/guilds/{serverid}/roles'
     r = discord_api_call(url, settings.DISCORD_BOT_TOKEN)
     if not r.ok:
         return r
@@ -235,7 +235,7 @@ def get_guild_roles(serverid):
 
 
 def get_guild_channels(serverid):
-    url = '{}/guilds/{}/channels'.format(settings.DISCORD_API_URL, serverid)
+    url = f'{settings.DISCORD_API_URL}/guilds/{serverid}/channels'
     r = discord_api_call(url, settings.DISCORD_BOT_TOKEN)
     if not r.ok:
         return r
@@ -264,13 +264,8 @@ def get_server_id_list(server_list):
 
 
 # def check_guild_user(serverid, userid):
-#     url = '{}/guilds/{}/members/{}'.format(
-#         settings.DISCORD_API_URL,
-#         serverid, userid,
-#     )
-#     headers = {
-#         'Authorization': 'Bot {}'.format(settings.DISCORD_BOT_TOKEN),
-#     }
+#     url = f'{settings.DISCORD_API_URL}/guilds/{serverid}/members/{userid}'
+#     headers = {'Authorization': f'Bot {settings.DISCORD_BOT_TOKEN}'}
 #     logger.debug('API CALL')
 #     r = requests.get(url, headers=headers, timeout=6)
 #     if not r.ok:

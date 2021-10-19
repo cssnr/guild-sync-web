@@ -30,7 +30,7 @@
                     {% csrf_token %}
                     <div class="form-row">
                         <div class="form-group col-lg-6 col-md-6">
-                            <label for="sync_method">Discord Guild Role</label>
+                            <label for="sync_method">Synchronization Method</label>
                             <select id="sync_method" name="sync_method" class="form-control custom-select">
                                 <option value="">-- Select Sync Method --</option>
                                 <option value="name" {% if server_profile.sync_method == 'name' %}selected{% endif %}>

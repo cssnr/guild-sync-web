@@ -7,32 +7,46 @@
 
 {% block body %}
 
+{% if user.is_authenticated %}
+
     <div class="row mt-2">
-
         <div class="col">
-            <h1>Discord Guild Sync</h1>
-
-            {% if user.is_authenticated %}
-                <p class="lead">Hello {% if user.first_name %}{{ user.first_name }}{% else %}{{ user.username }}{% endif %}
-                    and welcome to the Discord Guild Sync website.</p>
-                {% if not server_list %}
-                    <p>No servers that you can manage.</p>
-                {% else %}
-                    <p>These are the servers you can manage:</p>
-                    {% include 'include/servers.html' %}
-                {% endif %}
+            <h1 class="display-4">Guild Sync Website</h1>
+            <p class="lead">Hello {% if user.first_name %}{{ user.first_name }}{% else %}{{ user.username }}{% endif %}
+                and welcome to the Discord Guild Sync website.</p>
+            {% if not server_list %}
+                <p>No servers that you can manage.</p>
             {% else %}
-                <p class="lead">Hello and welcome to the Discord Guild Sync website.</p>
-                <p><a href="{% url 'oauth:login' %}?next={{ request.path }}" class="btn btn-lg btn-outline-primary" role="button">
-                    Log in with Discord
-                    <i class="fas fa-sign-in-alt"></i></a></p>
+                <p>These are the servers you can manage:</p>
+                {% include 'include/servers.html' %}
             {% endif %}
-
-            <p>For more information <a href="{% get_config "DISCORD_URL" %}">
-                Join our <i class="fab fa-discord"></i> Discord</a>.</p>
-
         </div>
-
     </div>
+
+{% else %}
+
+    <div class="row mt-2">
+        <div class="col">
+            <div class="jumbotron">
+                <h1 class="display-4">Guild Sync Website</h1>
+                <p class="lead">Hello and welcome to the Discord Guild Sync website.</p>
+                <hr class="my-4">
+                <p class="lead">This service synchronizes World of Warcraft Classic guild members to Discord Users and Roles...</p>
+                <p>More details available on the <a href="{% url 'home:about' %}">About</a> page.</p>
+                <a href="{% url 'oauth:login' %}?next={{ request.path }}" class="btn btn-lg btn-outline-primary" role="button">
+                                Log in with Discord
+                                <i class="fas fa-sign-in-alt"></i></a>
+            </div>
+        </div>
+    </div>
+
+{% endif %}
+
+<div class="row mt-2">
+    <div class="col">
+        <p>For more information <a href="{% get_config "DISCORD_URL" %}" target="_blank">
+            Join our <i class="fab fa-discord"></i> Discord</a>.</p>
+    </div>
+</div>
 
 {% endblock %}
