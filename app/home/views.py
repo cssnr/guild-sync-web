@@ -67,10 +67,10 @@ def server_view(request, serverid):
                         server_profile.is_enabled = False
                         server_profile.save()
                         messages.warning(request, 'Bot has been removed from server.')
-                        return render(request, 'server.html')
+                        return render(request, 'server.html', data)
                     else:
                         messages.warning(request, 'Discord API error. Try again later.')
-                        return render(request, 'server.html')
+                        return render(request, 'server.html', data)
 
                 channels = get_guild_channels(serverid)
                 if isinstance(channels, requests.models.Response):
