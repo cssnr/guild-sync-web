@@ -36,7 +36,6 @@ def process_upload(user_pk, data):
             for user in users:
                 if server.sync_method == 'note':
                     # note sync
-                    logger.info('Note Sync.')
                     discord_user = '{}#{}'.format(
                         user['user']['username'],
                         user['user']['discriminator'],
@@ -44,12 +43,11 @@ def process_upload(user_pk, data):
                     match = match_note(data['guilds'][g], discord_user)
                 elif server.sync_method == 'name':
                     # name sync
-                    logger.info('Name Sync.')
                     discord_user = user['nick'] if user['nick'] else user['user']['username']
                     match = match_name(data['guilds'][g], discord_user)
                     pass
                 else:
-                    logger.warning('Unknown sync_method: %s', server.sync_method)
+                    logger.warning('UNKNOWN server.sync_method: %s', server.sync_method)
                     continue
 
                 if match:
@@ -69,26 +67,26 @@ def process_upload(user_pk, data):
                             logger.error('Error adding role to user.')
                         else:
                             logger.info('Updated user successfully.')
+                        logger.info('time.sleep.3')
                         time.sleep(3)
+            logger.info('time.sleep.3')
             time.sleep(3)
 
 
 def match_note(guild_data, discord_user):
-    logger.info('discord_user: %s', discord_user)
     for user, data in guild_data.items():
         if data[2] == discord_user:
-            logger.info('Matched User: %s', discord_user)
+            logger.info('MATCH User: %s', discord_user)
             return user
     return None
 
 
 def match_name(guild_data, username):
-    logger.info('username: %s', username)
     for user, data in guild_data.items():
         if user and username:
             user_only = user.split('-')[0]
             if user_only.lower() == username.lower():
-                logger.info('Matched User: %s', username)
+                logger.info('MATCH Name: %s', username)
                 return user
     return None
 
