@@ -1,5 +1,6 @@
 import logging
 import requests
+import time
 from celery.decorators import task
 from django.conf import settings
 from django.core import management
@@ -19,7 +20,7 @@ def process_upload(user_pk, data):
     user = CustomUser.objects.get(pk=user_pk)
     logger.info(user.server_list)
     for g in data['guilds']:
-        logger.info(data['guilds'][g])
+        # logger.info(data['guilds'][g])
         guild = g.split('-')[0]
         realm = g.split('-')[1]
         logger.info('guild: %s', guild)
@@ -28,7 +29,6 @@ def process_upload(user_pk, data):
         logger.info(server)
         if server and server.server_id in user.server_list:
             logger.info('Matching Configuration: %s', server.server_id)
-            logger.info(server)
             r = get_guild_users(server.server_id)
             if not r.ok:
                 r.raise_for_status()
@@ -58,8 +58,8 @@ def process_upload(user_pk, data):
                     if server.guild_role and \
                             server.guild_role not in user['roles']:
                         logger.info('Adding %s to role %s',
-                                     user['user']['username'],
-                                     server.guild_role)
+                                    user['user']['username'],
+                                    server.guild_role)
                         r = add_guild_role(server.server_id,
                                            user['user']['id'],
                                            server.guild_role)
@@ -69,6 +69,8 @@ def process_upload(user_pk, data):
                             logger.error('Error adding role to user.')
                         else:
                             logger.info('Updated user successfully.')
+                        time.sleep(3)
+            time.sleep(3)
 
 
 def match_note(guild_data, discord_user):
