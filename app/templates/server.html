@@ -12,8 +12,13 @@
         <div class="col">
 
             <h2>{{ server_data.name }}</h2>
-            <img src="https://cdn.discordapp.com/icons/{{ server_data.id }}/{{ server_data.icon }}.png"
-                 class="img-thumbnail mb-1" alt="{{ server_data.name }}" width="128" height="128">
+            <img class="img-thumbnail mb-1" width="128" height="128"
+                    {% if server_data.icon %}
+                       src="https://cdn.discordapp.com/icons/{{ server_data.id }}/{{ server_data.icon }}.png"
+                    {% else %}
+                       src="{% static 'images/assets/server-placeholder.png' %}"
+                    {% endif %}
+                 alt="{{ server_data.name }}">
             <p>{{ server_data.id }}</p>
 
             {% if not server_profile.is_enabled %}
