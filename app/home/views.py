@@ -47,6 +47,7 @@ def server_view(request, serverid):
     # View  /server/{serverid}
     """
     if not request.method == 'POST':
+        request.session['last_server'] = serverid
         extra_data = {}
         server_profile = ServerProfile.objects.filter(server_id=serverid).first()
         logger.debug('server_profile: %s', server_profile)
@@ -79,17 +80,16 @@ def server_view(request, serverid):
                         server_profile.is_enabled = False
                         server_profile.save()
                         messages.warning(request, 'Bot has been removed from server.')
-                        return render(request, 'server.html')
+                        return render(request, 'server.html', data)
                     else:
                         messages.warning(request, 'Discord API error. Try again later.')
-                        return render(request, 'server.html')
+                        return render(request, 'server.html', data)
 
                 extra_data = {'roles': roles, 'channels': channels}
                 logger.info('extra_data: %s', extra_data)
                 cache.set(serverid, extra_data, 30)
         logger.info('extra_data: %s', extra_data)
         data.update(extra_data)
-        request.session['last_server'] = serverid
         return render(request, 'server.html', data)
 
     try:
