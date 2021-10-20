@@ -10,6 +10,6 @@ class TestViews(TestCase):
 
     def test_views(self):
         for view, status in self.views.items():
-            print('Testing view "{}" for code "{}"'.format(view, status))
+            print(f'Testing view "{view}" for code "{status}"')
             response = self.client.get(reverse(view))
             self.assertEqual(response.status_code, status)

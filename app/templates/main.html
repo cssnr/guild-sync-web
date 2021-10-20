@@ -51,9 +51,8 @@
                     <a href="{% url 'home:about' %}" class="nav-link">About</a>
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown"
-                       role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Resources</a>
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Resources</a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="dropdown-item" href="https://github.com/cssnr/guild-sync-addon" target="_blank">
                             Guild Sync Addon <i class="fas fa-external-link-alt ml-2"></i></a>
@@ -141,7 +140,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <img src="{% if user.avatar_hash %}https://cdn.discordapp.com/avatars/{{ user.discord_id }}/{{ user.avatar_hash }}.png{% else %}{% static 'images/default-user.png' %}{% endif %}"
+                    <img src="{% if user.avatar_hash %}https://cdn.discordapp.com/avatars/{{ user.discord_id }}/{{ user.avatar_hash }}.png{% else %}{% static 'images/assets/default-user.png' %}{% endif %}"
                          class="rounded float-right m-2" style="max-height:128px;max-width:128px;" alt="Profile Picture">
                     <h4 class="modal-title">{% if user.first_name %}{{ user.first_name }}{% else %}{{ user.username }}{% endif %}</h4>
                     <p>Information provided by Discord.</p>

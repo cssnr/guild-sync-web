@@ -36,10 +36,7 @@ def process_upload(user_pk, data):
             for user in users:
                 if server.sync_method == 'note':
                     # note sync
-                    discord_user = '{}#{}'.format(
-                        user['user']['username'],
-                        user['user']['discriminator'],
-                    )
+                    discord_user = f"{user['user']['username']}#{user['user']['discriminator']}"
                     match = match_note(data['guilds'][g], discord_user)
                 elif server.sync_method == 'name':
                     # name sync

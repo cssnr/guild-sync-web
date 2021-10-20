@@ -91,6 +91,15 @@ DATABASES = {
     }
 }
 
+if 'SENTRY_URL' in os.environ:
+    sentry_sdk.init(
+        dsn=os.environ['SENTRY_URL'],
+        integrations=[DjangoIntegration()],
+        traces_sample_rate=float(os.getenv('SENTRY_SAMPLE_RATE', 1.0)),
+        send_default_pii=True,
+        debug=strtobool(os.getenv('SENTRY_DEBUG', os.getenv('DEBUG', 'False'))),
+    )
+
 if DEBUG:
     DEBUG_TOOLBAR_PANELS = [
         'debug_toolbar.panels.versions.VersionsPanel',
@@ -111,15 +120,6 @@ if DEBUG:
         return True if request.user.is_superuser else False
 
     DEBUG_TOOLBAR_CONFIG = {'SHOW_TOOLBAR_CALLBACK': show_toolbar}
-
-else:
-    sentry_sdk.init(
-        dsn=os.environ['SENTRY_URL'],
-        integrations=[DjangoIntegration()],
-        traces_sample_rate=float(os.getenv('SENTRY_SAMPLE_RATE', 1.0)),
-        send_default_pii=True,
-        debug=strtobool(os.getenv('DEBUG', 'False')),
-    )
 
 
 LOGGING = {

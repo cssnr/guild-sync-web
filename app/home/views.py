@@ -146,7 +146,7 @@ def callback_view(request):
             # known error adding bot
             logger.warning(request.GET['error'])
             logger.warning(request.GET['error_description'])
-            messages.error(request, '{}: {}'.format(request.GET['error'], request.GET['error_description']))
+            messages.error(request, f"{request.GET['error']}: {request.GET['error_description']}")
         else:
             # unknown error adding bot
             logger.error('Error: unknown callback response.')

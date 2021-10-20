@@ -18,7 +18,7 @@ class ServerProfile(models.Model):
     objects = ServerProfileManager()
 
     def __str__(self):
-        return '{} - {}'.format(self.server_id, self.server_name)
+        return f'{self.server_id} - {self.server_name}'
 
     class Meta:
         verbose_name = 'Server Profile'
