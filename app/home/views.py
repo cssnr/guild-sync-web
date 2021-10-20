@@ -26,24 +26,11 @@ def home_view(request):
     """
     # View  /
     """
-    # this needs to move to login - is a bug
-    if 'server_list' not in request.session and request.user.is_authenticated:
-        server_list = get_user_servers(request.user.access_token)
-        if isinstance(server_list, requests.models.Response):
-            logger.error(server_list.content)
-            messages.warning(request, 'Error getting server list from Discord API.')
-            return render(request, 'home.html')
-        logger.debug('server_list: %s', server_list)
-        request.user.server_list = get_server_id_list(server_list)
-        request.user.save()
-        logger.debug('request.user.server_list: %s', request.user.server_list)
-        request.session['server_list'] = server_list
-    if 'server_list' in request.session:
-        logger.debug('server_list: from session')
+    if request.user.is_authenticated:
         data = {'server_list': request.session['server_list']}
+        return render(request, 'home.html', data)
     else:
-        data = {}
-    return render(request, 'home.html', data)
+        return render(request, 'home.html')
 
 
 def about_view(request):
