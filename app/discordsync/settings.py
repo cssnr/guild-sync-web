@@ -1,6 +1,8 @@
 import os
+import sentry_sdk
 from distutils.util import strtobool
 from celery.schedules import crontab
+from sentry_sdk.integrations.django import DjangoIntegration
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ROOT_URLCONF = 'discordsync.urls'
@@ -33,25 +35,25 @@ USE_X_FORWARDED_HOST = strtobool(os.getenv('USE_X_FORWARDED_HOST', 'False'))
 SECURE_REFERRER_POLICY = os.getenv('SECURE_REFERRER_POLICY', 'no-referrer')
 # SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 
-OAUTH_CLIENT_ID = os.getenv('OAUTH_CLIENT_ID')
-OAUTH_CLIENT_SECRET = os.getenv('OAUTH_CLIENT_SECRET')
-OAUTH_REDIRECT_URI = os.getenv('OAUTH_REDIRECT_URI')
-OAUTH_GRANT_TYPE = os.getenv('OAUTH_GRANT_TYPE')
-OAUTH_SCOPE = os.getenv('OAUTH_SCOPE')
+OAUTH_CLIENT_ID = os.environ['OAUTH_CLIENT_ID']
+OAUTH_CLIENT_SECRET = os.environ['OAUTH_CLIENT_SECRET']
+OAUTH_REDIRECT_URI = os.environ['OAUTH_REDIRECT_URI']
+OAUTH_GRANT_TYPE = os.environ['OAUTH_GRANT_TYPE']
+OAUTH_SCOPE = os.environ['OAUTH_SCOPE']
 
-DISCORD_API_URL = os.getenv('DISCORD_API_URL')
-DISCORD_BOT_REDIRECT = os.getenv('DISCORD_BOT_REDIRECT')
-DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
-DISCORD_BOT_USER_ID = os.getenv('DISCORD_BOT_USER_ID')
-DISCORD_URL = os.getenv('DISCORD_URL')
+DISCORD_API_URL = os.environ['DISCORD_API_URL'].rstrip('/')
+DISCORD_BOT_REDIRECT = os.environ['DISCORD_BOT_REDIRECT']
+DISCORD_BOT_TOKEN = os.environ['DISCORD_BOT_TOKEN']
+DISCORD_BOT_USER_ID = os.environ['DISCORD_BOT_USER_ID']
+DISCORD_URL = os.environ['DISCORD_URL']
 
-GOOGLE_SITE_PUBLIC = os.getenv('GOOGLE_SITE_PUBLIC')
-GOOGLE_SITE_SECRET = os.getenv('GOOGLE_SITE_SECRET')
+GOOGLE_SITE_PUBLIC = os.environ['GOOGLE_SITE_PUBLIC']
+GOOGLE_SITE_SECRET = os.environ['GOOGLE_SITE_SECRET']
 
-TWITCH_CLIENT_ID = os.getenv('TWITCH_CLIENT_ID')
-TWITCH_CLIENT_SECRET = os.getenv('TWITCH_CLIENT_SECRET')
+TWITCH_CLIENT_ID = os.environ['TWITCH_CLIENT_ID']
+TWITCH_CLIENT_SECRET = os.environ['TWITCH_CLIENT_SECRET']
 
-CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND')
+CELERY_RESULT_BACKEND = os.environ['CELERY_RESULT_BACKEND']
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = os.getenv('TZ', 'America/Los_Angeles')
@@ -65,7 +67,8 @@ CELERY_BEAT_SCHEDULE = {
 
 CACHES = {
     'default': {
-        'BACKEND': os.getenv('CACHE_BACKEND', 'django.core.cache.backends.locmem.LocMemCache'),
+        'BACKEND': os.getenv('CACHE_BACKEND',
+                             'django.core.cache.backends.locmem.LocMemCache'),
         'LOCATION': os.getenv('CACHE_LOCATION', 'localhost:11211'),
         'OPTIONS': {
             'server_max_value_length': 1024 * 1024 * 4,
@@ -88,6 +91,15 @@ DATABASES = {
     }
 }
 
+if 'SENTRY_URL' in os.environ:
+    sentry_sdk.init(
+        dsn=os.environ['SENTRY_URL'],
+        integrations=[DjangoIntegration()],
+        traces_sample_rate=float(os.getenv('SENTRY_SAMPLE_RATE', 1.0)),
+        send_default_pii=True,
+        debug=strtobool(os.getenv('SENTRY_DEBUG', os.getenv('DEBUG', 'False'))),
+    )
+
 if DEBUG:
     DEBUG_TOOLBAR_PANELS = [
         'debug_toolbar.panels.versions.VersionsPanel',
@@ -108,6 +120,7 @@ if DEBUG:
         return True if request.user.is_superuser else False
 
     DEBUG_TOOLBAR_CONFIG = {'SHOW_TOOLBAR_CALLBACK': show_toolbar}
+
 
 LOGGING = {
     'version': 1,
@@ -181,20 +194,5 @@ TEMPLATES = [
                 'django.template.context_processors.static',
             ],
         },
-    },
-]
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]

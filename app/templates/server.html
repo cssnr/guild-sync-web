@@ -1,6 +1,7 @@
 {% extends "main.html" %}
 {% block server_active %}active{% endblock %}
 {% block title %}{{ server_data.name }}{% endblock %}
+{% load static %}
 {% load home_tags %}
 
 {% block head %}{% endblock %}
@@ -11,8 +12,13 @@
         <div class="col">
 
             <h2>{{ server_data.name }}</h2>
-            <img src="https://cdn.discordapp.com/icons/{{ server_data.id }}/{{ server_data.icon }}.png"
-                 class="img-thumbnail mb-1" alt="{{ server_data.name }}" width="128" height="128">
+            <img class="img-thumbnail mb-1" width="128" height="128"
+                    {% if server_data.icon %}
+                       src="https://cdn.discordapp.com/icons/{{ server_data.id }}/{{ server_data.icon }}.png"
+                    {% else %}
+                       src="{% static 'images/assets/server-placeholder.png' %}"
+                    {% endif %}
+                 alt="{{ server_data.name }}">
             <p>{{ server_data.id }}</p>
 
             {% if not server_profile.is_enabled %}
@@ -24,11 +30,86 @@
 
                 <p><button type="button" class="btn btn-lg btn-outline-success" disabled>Bot Enabled</button></p>
                 <h4>Settings</h4>
-                <p>Coming Soon...</p>
+
+                <form id="update-server-form" name="update-server-form" method="POST" action="{% url 'home:server' server_data.id %}">
+                    {% csrf_token %}
+                    <div class="form-row">
+                        <div class="form-group col-lg-6 col-md-6">
+                            <label for="sync_method">Synchronization Method</label>
+                            <select id="sync_method" name="sync_method" class="form-control custom-select">
+                                <option value="">-- Select Sync Method --</option>
+                                <option value="name" {% if server_profile.sync_method == 'name' %}selected{% endif %}>
+                                    Name Based</option>
+                                <option value="note" {% if server_profile.sync_method == 'note' %}selected{% endif %}>
+                                    Note Based</option>
+                            </select>
+                            <div class="invalid-feedback" id="sync_method-invalid"></div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-lg-6 col-md-6">
+                            <label for="guild_name">Guild Name (in-game)</label>
+                            <input type="text" class="form-control" id="guild_name" name="guild_name" placeholder="Guild Name"
+                                {% if server_profile.guild_name %}value="{{ server_profile.guild_name }}"{% endif %}>
+                            <div class="invalid-feedback" id="guild_name-invalid"></div>
+                        </div>
+                        <div class="form-group col-lg-6 col-md-6">
+                            <label for="guild_realm">Guild Realm (in-game)</label>
+                            <input type="text" class="form-control" id="guild_realm" name="guild_realm" placeholder="Guild Realm"
+                                {% if server_profile.guild_realm %}value="{{ server_profile.guild_realm }}"{% endif %}>
+                            <div class="invalid-feedback" id="guild_realm-invalid"></div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-lg-6 col-md-6">
+                            <label for="guild_role">Discord Guild Role</label>
+                            <select id="guild_role" name="guild_role" class="form-control custom-select">
+                                <option value="">-- Select Role --</option>
+                                {% for role in roles %}
+                                    <option value="{{ role.1 }}" {% if server_profile.guild_role == role.1 %}selected{% endif %}>
+                                        {{ role.0 }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback" id="guild_role-invalid"></div>
+                        </div>
+                        <div class="form-group col-lg-6 col-md-6">
+                            <label for="alert_channel">Alerts Channel</label>
+                            <select id="alert_channel" name="alert_channel" class="form-control custom-select">
+                                <option value="">-- Select Channel --</option>
+                                {% for channel in channels %}
+                                    <option value="{{ channel.1 }}" {% if server_profile.alert_channel == channel.1 %}selected{% endif %}>
+                                        #{{ channel.0 }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback" id="alert_channel-invalid"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="server_notes">Server Notes</label>
+                        <textarea class="form-control" id="server_notes" name="server_notes" rows="3"
+                            >{% if server_profile.server_notes %}{{ server_profile.server_notes }}{% endif %}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="sync_classes" name="sync_classes"
+                                {% if server_profile.sync_classes %}checked{% else %}{% endif %}>
+                            <label class="form-check-label" for="sync_classes">Sync Class Roles to Discord Class Roles</label>
+                        </div>
+                    </div>
+                    <button type="submit" id="save-server-btn" class="btn btn-primary">Save Profile</button>
+                    <span style="display:none;" id="server_saved" class="text-success ml-3">
+                        <i class="fas fa-check-circle"></i> Profile Saved</span>
+                </form>
+                <div class="mb-3"></div>
 
             {% endif %}
 
         </div>
     </div>
 
+{% endblock %}
+
+{% block tail %}
+    <script type="text/javascript" src="{% static 'main/js/server.js' %}"></script>
 {% endblock %}

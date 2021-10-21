@@ -8,4 +8,5 @@ mysqlclient
 python-memcached
 redis
 requests
+sentry-sdk
 Werkzeug

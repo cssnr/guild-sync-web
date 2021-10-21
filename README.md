@@ -1,6 +1,6 @@
-# Discord Sync
+# Guild Sync Website
 
-Discord Sync.
+Sync WoW Classic Guild members with Discord roles.
 
 Coming soon...
 

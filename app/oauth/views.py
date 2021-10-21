@@ -8,6 +8,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import HttpResponseRedirect, redirect
 from django.views.decorators.http import require_http_methods
 from .models import CustomUser
+from home.views import get_user_servers, get_server_id_list
 
 logger = logging.getLogger('app')
 
@@ -25,7 +26,7 @@ def start_oauth(request):
         'scope': settings.OAUTH_SCOPE,
     }
     url_params = urllib.parse.urlencode(params)
-    url = 'https://discord.com/api/oauth2/authorize?{}'.format(url_params)
+    url = f'https://discord.com/api/oauth2/authorize?{url_params}'
     return HttpResponseRedirect(url)
 
 
@@ -38,6 +39,7 @@ def oauth_callback(request):
         user_profile = get_user_profile(access_token)
         user = login_user(request, user_profile['django_username'], user_profile)
         messages.info(request, f'Successfully logged in as {user.first_name}.')
+        post_login_actions(request, user)
     except Exception as error:
         logger.exception(error)
         messages.error(request, f'Exception during login: {error}')
@@ -82,7 +84,7 @@ def get_access_token(code):
     """
     Post OAuth code and Return access_token
     """
-    url = '{}/oauth2/token'.format(settings.DISCORD_API_URL)
+    url = f'{settings.DISCORD_API_URL}/oauth2/token'
     data = {
         'client_id': settings.OAUTH_CLIENT_ID,
         'client_secret': settings.OAUTH_CLIENT_SECRET,
@@ -101,10 +103,8 @@ def get_user_profile(access_token):
     """
     Get Profile for Authenticated User
     """
-    url = '{}/users/@me'.format(settings.DISCORD_API_URL)
-    headers = {
-        'Authorization': 'Bearer {}'.format(access_token),
-    }
+    url = f'{settings.DISCORD_API_URL}/users/@me'
+    headers = {'Authorization': f'Bearer {access_token}'}
     logger.debug('API CALL')
     r = requests.get(url, headers=headers, timeout=10)
     logger.debug('status_code: %s', r.status_code)
@@ -132,6 +132,22 @@ def update_profile(user, user_profile):
     user.avatar_hash = user_profile['avatar']
     user.access_token = user_profile['access_token']
     return user
+
+
+def post_login_actions(request, user):
+    logger.debug(user)
+
+    server_list = get_user_servers(request.user.access_token)
+    if isinstance(server_list, requests.models.Response):
+        logger.error(server_list.content)
+        messages.warning(request, 'Error getting server list from Discord API.')
+        return False
+    logger.debug('server_list: %s', server_list)
+    request.user.server_list = get_server_id_list(server_list)
+    request.user.save()
+    logger.debug('request.user.server_list: %s', request.user.server_list)
+    request.session['server_list'] = server_list
+    return True
 
 
 def get_next_url(request):
