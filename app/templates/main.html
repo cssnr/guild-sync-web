@@ -50,14 +50,17 @@
                 <li class="nav-item {% block about_active %}{% endblock %}">
                     <a href="{% url 'home:about' %}" class="nav-link">About</a>
                 </li>
+                <li class="nav-item {% block setup_active %}{% endblock %}">
+                    <a href="{% url 'home:setup' %}" class="nav-link">Setup Docs</a>
+                </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link" href="#" id="navbarDropdown1" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Resources <i class="fas fa-angle-down text-primary d-none d-md-inline d-lg-inline d-xl-inline mr-1"></i></a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown1">
                         <a class="dropdown-item" href="https://github.com/cssnr/guild-sync-addon" target="_blank">
-                            Guild Sync Addon <i class="fas fa-external-link-alt ml-2"></i></a>
+                            Guild Sync Addon <i class="fas fa-external-link-alt ml-1"></i></a>
                         <a class="dropdown-item" href="https://github.com/cssnr/guild-sync-client" target="_blank">
-                            Guild Sync Client <i class="fas fa-external-link-alt ml-2"></i></a>
+                            Guild Sync Client <i class="fas fa-external-link-alt ml-1"></i></a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="{% get_config "DISCORD_URL" %}" target="_blank">
                             Join our <i class="fab fa-discord"></i> Discord</a>
@@ -85,7 +88,7 @@
                                     <i class="fas fa-tools mr-2"></i> Admin</a>
 
                                 <a class="dropdown-item text-warning" href="{% url 'flower' %}" target="_blank">
-                                    <i class="fas fa-seedling mr-2"></i> Flower <i class="fas fa-external-link-alt ml-2"></i></a>
+                                    <i class="fas fa-seedling mr-2"></i> Flower <i class="fas fa-external-link-alt ml-1"></i></a>
                             {% endif %}
 
                             <div class="dropdown-divider"></div>
@@ -118,7 +121,14 @@
 
     {% block body %}{% endblock %}
 
-    {% block footer %}{% endblock %}
+    {% block footer %}
+        <div class="row mt-2">
+            <div class="col">
+                <p>For more information <a href="{% get_config "DISCORD_URL" %}" target="_blank">
+                    Join our <i class="fab fa-discord"></i> Discord</a>.</p>
+            </div>
+        </div>
+    {% endblock %}
 
 </div> <!-- Container END -->
 
@@ -164,7 +174,7 @@
                 </div>
                 <div class="modal-footer">
                     <a href="https://discord.com/login" class="btn btn-primary" role="button" target="_blank">
-                        Open in Discord <i class="fas fa-external-link-alt ml-2"></i></a>
+                        Open in Discord <i class="fas fa-external-link-alt ml-1"></i></a>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">
                         Close <i class="fas fa-times ml-2"></i></button>
                 </div>
