@@ -12,6 +12,7 @@ class ServerProfile(models.Model):
     server_notes = models.TextField(blank=True, verbose_name='Server Notes')
     sync_method = models.CharField(default=False, max_length=32, verbose_name='Sync Method')
     sync_classes = models.BooleanField(default=False, verbose_name='Sync Class Roles')
+    create_roles = models.BooleanField(default=False, verbose_name='Create Class Roles')
     is_enabled = models.BooleanField(default=False, verbose_name='Server Enable Status')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
