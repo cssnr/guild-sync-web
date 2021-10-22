@@ -66,8 +66,8 @@
                             <select id="guild_role" name="guild_role" class="form-control custom-select">
                                 <option value="">-- Select Role --</option>
                                 {% for role in roles %}
-                                    <option value="{{ role.1 }}" {% if server_profile.guild_role == role.1 %}selected{% endif %}>
-                                        {{ role.0 }}</option>
+                                    <option value="{{ role.id }}" {% if server_profile.guild_role == role.id %}selected{% endif %}>
+                                        {{ role.name }}</option>
                                 {% endfor %}
                             </select>
                             <div class="invalid-feedback" id="guild_role-invalid"></div>
@@ -84,18 +84,17 @@
                             <div class="invalid-feedback" id="alert_channel-invalid"></div>
                         </div>
                     </div>
-
-                    <div class="form-group">
-                        <label for="server_notes">Server Notes</label>
-                        <textarea class="form-control" id="server_notes" name="server_notes" rows="3"
-                            >{% if server_profile.server_notes %}{{ server_profile.server_notes }}{% endif %}</textarea>
-                    </div>
                     <div class="form-group">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="sync_classes" name="sync_classes"
                                 {% if server_profile.sync_classes %}checked{% else %}{% endif %}>
                             <label class="form-check-label" for="sync_classes">Sync Class Roles to Discord Class Roles</label>
                         </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="server_notes">Server Notes</label>
+                        <textarea class="form-control" id="server_notes" name="server_notes" rows="3"
+                            >{% if server_profile.server_notes %}{{ server_profile.server_notes }}{% endif %}</textarea>
                     </div>
                     <button type="submit" id="save-server-btn" class="btn btn-primary">Save Profile</button>
                     <span style="display:none;" id="server_saved" class="text-success ml-3">

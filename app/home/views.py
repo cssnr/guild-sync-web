@@ -12,7 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from .forms import ServerForm
 from .models import ServerProfile
-from .tasks import process_upload, discord_api_call
+from .tasks import process_upload, discord_api_call, get_guild_roles
 from oauth.models import CustomUser
 
 logger = logging.getLogger('app')
@@ -206,19 +206,6 @@ def get_user_servers(access_token):
             server_list.append(server)
     logger.debug(server_list)
     return server_list
-
-
-def get_guild_roles(serverid):
-    url = f'{settings.DISCORD_API_URL}/guilds/{serverid}/roles'
-    r = discord_api_call(url, settings.DISCORD_BOT_TOKEN)
-    if not r.ok:
-        return r
-    role_list = []
-    for role in r.json():
-        if not role['managed'] and not role['position'] == 0:
-            role_list.append((role['name'], role['id']))
-    logger.debug(role_list)
-    return role_list
 
 
 def get_guild_channels(serverid):
