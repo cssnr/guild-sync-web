@@ -13,6 +13,7 @@ class ServerForm(forms.Form):
     alert_channel = forms.CharField(max_length=32, required=False)
     server_notes = forms.CharField(required=False)
     sync_classes = forms.BooleanField(required=False)
+    create_roles = forms.BooleanField(required=False)
     sync_method = forms.MultipleChoiceField(
         choices=SYNC_OPTIONS,
     )

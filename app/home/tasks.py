@@ -36,6 +36,12 @@ def process_upload(user_pk, data):
                 r.raise_for_status()
             users = r.json()
             logger.info('server.sync_method: %s', server.sync_method)
+            if server.sync_classes:
+                logger.info('Sync classes enabled, fetching roles for later.')
+                roles = get_guild_roles(server.server_id)
+                logger.info(roles)
+                logger.info('time.sleep.3')
+                time.sleep(3)
             for user in users:
                 if server.sync_method == 'note':
                     # note sync
@@ -60,7 +66,7 @@ def process_upload(user_pk, data):
                         logger.info('Adding %s to role %s',
                                     user['user']['username'],
                                     server.guild_role)
-                        r = add_guild_role(server.server_id,
+                        r = add_role_to_user(server.server_id,
                                            user['user']['id'],
                                            server.guild_role)
                         logger.info(r.status_code)
@@ -73,14 +79,10 @@ def process_upload(user_pk, data):
                         time.sleep(3)
                     if server.sync_classes:
                         logger.info('Sync classes enabled, checking for role match.')
-                        roles = get_guild_roles(server.server_id)
-                        logger.info(roles)
                         role_match = match_class_role(roles, user_match)
-                        logger.info('time.sleep.3')
-                        time.sleep(3)
                         if role_match:
                             logger.info('Matching Class Role: %s', role_match['id'])
-                            r = add_guild_role(server.server_id,
+                            r = add_role_to_user(server.server_id,
                                                user['user']['id'],
                                                role_match['id'])
                             logger.info(r.status_code)
@@ -129,12 +131,20 @@ def get_guild_users(serverid):
     return discord_api_call(url, settings.DISCORD_BOT_TOKEN, params=params)
 
 
-def add_guild_role(guildid, userid, roleid):
+def add_role_to_user(guildid, userid, roleid):
     api_base = settings.DISCORD_API_URL
     url = f'{api_base}/guilds/{guildid}/members/{userid}/roles/{roleid}'
-    logger.info('discord_api_call')
     headers = {'Authorization': f'Bot {settings.DISCORD_BOT_TOKEN}'}
+    logger.info('discord_api_call')
     return requests.put(url, headers=headers, timeout=6)
+
+
+def create_role(guildid, name, color=None, mentionable=False):
+    url = f'{settings.DISCORD_API_URL}/guilds/{guildid}/roles/'
+    headers = {'Authorization': f'Bot {settings.DISCORD_BOT_TOKEN}'}
+    data = {'name': name, 'color': color, 'mentionable': mentionable}
+    logger.info('discord_api_call')
+    return requests.post(url, headers=headers, data=data, timeout=6)
 
 
 def get_guild_roles(serverid):
@@ -150,19 +160,17 @@ def get_guild_roles(serverid):
     return role_list
 
 
-def discord_api_call(url, token, tt='Bot', params=None):
-    logger.info('discord_api_call')
-    headers = {'Authorization': f'{tt} {token}'}
-    return requests.get(url, params=params, headers=headers, timeout=6)
-
-
 def send_discord_message(channel_id, message):
     url = f'{settings.DISCORD_API_URL}/channels/{channel_id}/messages'
-    headers = {
-        'Authorization': f'Bot {settings.DISCORD_BOT_TOKEN}',
-    }
+    headers = {'Authorization': f'Bot {settings.DISCORD_BOT_TOKEN}'}
     data = {'content': message}
     r = requests.post(url, headers=headers, data=data, timeout=10)
     if not r.ok:
         r.raise_for_status()
     return r
+
+
+def discord_api_call(url, token, tt='Bot', params=None):
+    logger.info('discord_api_call')
+    headers = {'Authorization': f'{tt} {token}'}
+    return requests.get(url, params=params, headers=headers, timeout=6)

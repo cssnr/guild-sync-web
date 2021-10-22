@@ -107,6 +107,7 @@ def server_view(request, serverid):
             server_profile.alert_channel = form.cleaned_data['alert_channel']
             server_profile.server_notes = form.cleaned_data['server_notes']
             server_profile.sync_classes = bool(form.cleaned_data['sync_classes'])
+            server_profile.create_roles = bool(form.cleaned_data['create_roles'])
             server_profile.sync_method = form.cleaned_data['sync_method'][0]
             server_profile.save()
             logger.debug('server_profile: save')
