@@ -36,12 +36,15 @@ def process_upload(user_pk, data):
                 r.raise_for_status()
             users = r.json()
             logger.info('server.sync_method: %s', server.sync_method)
-            if server.sync_classes:
-                logger.info('Sync classes enabled, fetching roles for later.')
+            if server.sync_classes or server.create_roles:
+                logger.info('Sync classes or create roles enabled, fetching roles for later.')
                 roles = get_guild_roles(server.server_id)
                 logger.info(roles)
                 logger.info('time.sleep.3')
                 time.sleep(3)
+            if server.create_roles:
+                logger.info('Create Roles enabled, creating roles now...')
+                create_roles(server, roles)
             for user in users:
                 if server.sync_method == 'note':
                     # note sync
@@ -125,6 +128,44 @@ def match_name(guild_data, username):
     return None
 
 
+def match_role(role_name, roles):
+    for role in roles:
+        if role_name == role['name'].lower():
+            return True
+    return False
+
+
+def create_roles(server, roles):
+    role_colors = {
+        'druid': '16743434',
+        'hunter': '11195250',
+        'mage': '4179947',
+        'paladin': '16026810',
+        'priest': '16777215',
+        'rogue': '16774248',
+        'shaman': '28893',
+        'warlock': '8882414',
+        'warrior': '13015917',
+    }
+    for role_name, color in role_colors.items():
+        logger.info('Checking Role: %s', role_name)
+        exists = match_role(role_name, roles)
+        if not exists:
+            logger.info('Creating Role: %s', role_name)
+            r = create_role(server.server_id,
+                            role_name.title(),
+                            color=color,
+                            mentionable=True)
+            if not r.ok:
+                logger.error('Error Crating Role: %s', role_name)
+                logger.error(r.status_code)
+                logger.error(r.content.decode('utf-8'))
+            else:
+                logger.info('Role Created Successfully: %s', role_name)
+            logger.info('time.sleep.5')
+            time.sleep(5)
+
+
 def get_guild_users(serverid):
     params = {'limit': 1000}
     url = f'{settings.DISCORD_API_URL}/guilds/{serverid}/members'
@@ -140,11 +181,14 @@ def add_role_to_user(guildid, userid, roleid):
 
 
 def create_role(guildid, name, color=None, mentionable=False):
-    url = f'{settings.DISCORD_API_URL}/guilds/{guildid}/roles/'
+    logger.info('guildid: %s', guildid)
+    url = f'{settings.DISCORD_API_URL}/guilds/{guildid}/roles'
+    logger.info('url: %s', url)
     headers = {'Authorization': f'Bot {settings.DISCORD_BOT_TOKEN}'}
     data = {'name': name, 'color': color, 'mentionable': mentionable}
+    logger.info(data)
     logger.info('discord_api_call')
-    return requests.post(url, headers=headers, data=data, timeout=6)
+    return requests.post(url, headers=headers, json=data, timeout=6)
 
 
 def get_guild_roles(serverid):
@@ -156,7 +200,7 @@ def get_guild_roles(serverid):
     for role in r.json():
         if not role['managed'] and not role['position'] == 0:
             role_list.append(role)
-    logger.debug(role_list)
+    logger.info(role_list)
     return role_list
 
 
