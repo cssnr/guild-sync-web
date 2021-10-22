@@ -1,0 +1,54 @@
+{% extends "main.html" %}
+{% block setup_active %}active{% endblock %}
+{% block title %}Setup Docs{% endblock %}
+{% load home_tags %}
+
+{% block head %}{% endblock %}
+
+{% block body %}
+
+    <div class="row mt-2">
+        <div class="col">
+            <h1 class="display-4">Setup Docs</h1>
+
+            <h5 id="step1">1. Enable Guild Sync</h5>
+            <p class="lead">Log in to the website, select a server from the home page, click the Enable button, and follow the dialogs to add the bot to your server.</p>
+
+            <h5 id="step2">2. Select Sync Settings</h5>
+            <p class="lead">Log in to the website, select a server from the home page, enable the desired options.</p>
+
+            <h5 id="step3">3. Update Role in Discord</h5>
+            <p class="lead">Log in to Discord, go to the server, open the server settings page, go to Roles and drag the "Guild Sync" role above all other roles it needs to manage.</p>
+            <p>Discord will not let anyone modify any roles that are above it even if they are an administrator.</p>
+
+            <h5 id="step4">4. Install WoW Addon</h5>
+            <p class="lead">Download and install the World of Warcraft Classic Addon.</p>
+            <p>
+                Extract the archive to your Addons folder.<br>
+                Example: <code>C:\Program Files (x86)\World of Warcraft\_classic_\Interface\AddOns</code>
+            </p>
+            <ul>
+                <li>Download: <a href="https://github.com/cssnr/guild-sync-addon/releases/latest/download/GuildSync.zip" target="_blank">
+                    Guild Sync Addon</a></li>
+                <li>Source/Docs: <a href="https://github.com/cssnr/guild-sync-addon" target="_blank">
+                    Guild Sync Addon <i class="fas fa-external-link-alt"></i></a></li>
+            </ul>
+            <p>
+                Make sure the Addon is enabled and log in to World of Warcraft. Wait 30 seconds for a full sync.<br>
+                You can verify the addon is working and do a manual sync with: <code>/gs sync</code>
+            </p>
+
+            <h5 id="step4">5. Install Client App</h5>
+            <p class="lead">Download and run the Guild Sync Client App.</p>
+            <ul>
+                <li>Download: <a href="https://github.com/cssnr/guild-sync-client/releases/latest/download/GuildSync.exe" target="_blank">
+                    Guild Sync Client</a></li>
+                <li>Source/Docs: <a href="https://github.com/cssnr/guild-sync-client" target="_blank">
+                    Guild Sync Client <i class="fas fa-external-link-alt"></i></a></li>
+            </ul>
+            <p>You will need your <code>Client Access Key</code> found in your Profile from the dropdown in the top-rgiht corner of the website.</p>
+
+        </div>
+    </div>
+
+{% endblock %}

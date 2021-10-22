@@ -40,6 +40,13 @@ def about_view(request):
     return render(request, 'about.html')
 
 
+def setup_view(request):
+    """
+    # View  /setup/
+    """
+    return render(request, 'setup.html')
+
+
 @login_required
 @user_passes_test(is_auth_user, login_url='/')
 def server_view(request, serverid):
