@@ -83,11 +83,11 @@ def process_upload(user_pk, data):
                     if server.sync_classes:
                         logger.info('Sync classes enabled, checking for role match.')
                         role_match = match_class_role(roles, user_match)
-                        if role_match:
+                        if role_match and role_match['id'] not in user['roles']:
                             logger.info('Matching Class Role: %s', role_match['id'])
                             r = add_role_to_user(server.server_id,
-                                               user['user']['id'],
-                                               role_match['id'])
+                                                 user['user']['id'],
+                                                 role_match['id'])
                             logger.info(r.status_code)
                             logger.info(r.content.decode('utf-8'))
                             if not r.ok:
