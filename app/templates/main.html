@@ -62,6 +62,8 @@
                         <a class="dropdown-item" href="https://github.com/cssnr/guild-sync-client" target="_blank">
                             Guild Sync Client <i class="fas fa-external-link-alt ml-1"></i></a>
                         <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="https://github.com/cssnr/guild-sync-web" target="_blank">
+                            View on <i class="fab fa-github"></i> GitHub</a>
                         <a class="dropdown-item" href="{% get_config "DISCORD_URL" %}" target="_blank">
                             Join our <i class="fab fa-discord"></i> Discord</a>
                     </div>
@@ -124,8 +126,9 @@
     {% block footer %}
         <div class="row mt-2">
             <div class="col">
-                <p>For more information <a href="{% get_config "DISCORD_URL" %}" target="_blank">
-                    Join our <i class="fab fa-discord"></i> Discord</a>.</p>
+                <p>For more information join our <a href="{% get_config "DISCORD_URL" %}" target="_blank">
+                    <i class="fab fa-discord"></i> Discord</a> or view at
+                    <a href="https://github.com/cssnr/guild-sync-web" target="_blank"><i class="fab fa-github"></i> GitHub.</a></p>
             </div>
         </div>
     {% endblock %}
