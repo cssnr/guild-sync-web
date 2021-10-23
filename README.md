@@ -2,7 +2,12 @@
 
 Sync WoW Classic Guild members with Discord roles.
 
-Coming soon...
+[https://guildsync.cc/](https://guildsync.cc/)
+
+### Additional Components
+
+* [Guild Sync Addon](https://github.com/cssnr/guild-sync-addon)
+* [Guild Sync Client](https://github.com/cssnr/guild-sync-client)
 
 ### Frameworks
 
