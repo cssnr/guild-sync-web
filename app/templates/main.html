@@ -76,7 +76,7 @@
                         <a class="nav-link" href="#" id="navbarDropdown2" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             {% if user.first_name %}{{ user.first_name }}{% else %}{{ user.username }}{% endif %}
                             <i class="fas fa-angle-down text-primary d-none d-md-inline d-lg-inline d-xl-inline mr-1"></i>
-                            <img src="{% if user.avatar_hash %}https://cdn.discordapp.com/avatars/{{ user.discord_id }}/{{ user.avatar_hash }}.png{% else %}{% static 'images/assets/default-user.png' %}{% endif %}"
+                            <img src="{% if user.avatar_hash %}https://cdn.discordapp.com/avatars/{{ user.username }}/{{ user.avatar_hash }}.png{% else %}{% static 'images/assets/default-user.png' %}{% endif %}"
                                  class="rounded-circle mx-2 d-none d-md-inline d-lg-inline d-xl-inline" height="31" width="31" alt="P"></a>
 
                         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown2">
@@ -152,7 +152,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <img src="{% if user.avatar_hash %}https://cdn.discordapp.com/avatars/{{ user.discord_id }}/{{ user.avatar_hash }}.png{% else %}{% static 'images/assets/default-user.png' %}{% endif %}"
+                    <img src="{% if user.avatar_hash %}https://cdn.discordapp.com/avatars/{{ user.username }}/{{ user.avatar_hash }}.png{% else %}{% static 'images/assets/default-user.png' %}{% endif %}"
                          class="rounded float-right m-2" style="max-height:128px;max-width:128px;" alt="Profile Picture">
                     <h4 class="modal-title">{% if user.first_name %}{{ user.first_name }}{% else %}{{ user.username }}{% endif %}</h4>
                     <p>Information provided by Discord.</p>
@@ -162,11 +162,11 @@
                         <tbody>
                         <tr>
                             <th>Discord ID</th>
-                            <td>{{ user.discord_id }}</td>
+                            <td>{{ user.username }}</td>
                         </tr>
                         <tr>
                             <th>Discord Username</th>
-                            <td>{{ user.discord_username }}#{{ user.discriminator }}</td>
+                            <td>{{ user.first_name }}#{{ user.discriminator }}</td>
                         </tr>
                         <tr>
                             <th>Client Access Key</th>

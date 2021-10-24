@@ -1,10 +1,10 @@
 import logging
 import requests
 import urllib.parse
+from datetime import datetime, timedelta
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login, logout
-from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import HttpResponseRedirect, redirect
 from django.views.decorators.http import require_http_methods
 from .models import CustomUser
@@ -13,12 +13,11 @@ from home.views import get_user_servers, get_server_id_list
 logger = logging.getLogger('app')
 
 
-def start_oauth(request):
+def oauth_start(request):
     """
     # View  /oauth/
     """
     request.session['login_redirect_url'] = get_next_url(request)
-    logger.debug('login_redirect_url: %s', request.session['login_redirect_url'])
     params = {
         'client_id': settings.OAUTH_CLIENT_ID,
         'redirect_uri': settings.OAUTH_REDIRECT_URI,
@@ -35,11 +34,11 @@ def oauth_callback(request):
     # View  /oauth/callback/
     """
     try:
-        access_token = get_access_token(request.GET['code'])
-        user_profile = get_user_profile(access_token)
-        user = login_user(request, user_profile['django_username'], user_profile)
+        auth_data = get_access_token(request.GET['code'])
+        profile = get_user_profile(auth_data)
+        user = login_user(request, profile)
+        post_login_actions(request)
         messages.info(request, f'Successfully logged in as {user.first_name}.')
-        post_login_actions(request, user)
     except Exception as error:
         logger.exception(error)
         messages.error(request, f'Exception during login: {error}')
@@ -51,7 +50,7 @@ def oauth_callback(request):
 
 
 @require_http_methods(['POST'])
-def log_out(request):
+def oauth_logout(request):
     """
     View  /oauth/logout/
     """
@@ -59,6 +58,7 @@ def log_out(request):
     # Hack to prevent login loop when logging out on a secure page
     logger.debug('next_url: %s', next_url.split('/')[1])
     if next_url.split('/')[1] in ['profile', 'server']:
+        logger.debug('Protected View. Changing: next_url')
         next_url = '/'
     logger.debug('login_next_url: %s', next_url)
     request.session['login_next_url'] = next_url
@@ -66,16 +66,12 @@ def log_out(request):
     return redirect(next_url)
 
 
-def login_user(request, username, profile):
+def login_user(request, profile):
     """
     Login or create user
     """
-    try:
-        user = CustomUser.objects.get(username=username)
-    except ObjectDoesNotExist:
-        user = CustomUser.objects.create_user(username)
-    user = update_profile(user, profile)
-    user.save()
+    user, _ = CustomUser.objects.get_or_create(username=profile['id'])
+    update_profile(user, profile)
     login(request, user)
     return user
 
@@ -94,60 +90,59 @@ def get_access_token(code):
     }
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
     r = requests.post(url, data=data, headers=headers, timeout=10)
-    logger.debug('status_code: %s', r.status_code)
-    logger.debug('content: %s', r.content)
-    return r.json()['access_token']
+    if not r.ok:
+        logger.warning('status_code: %s', r.status_code)
+        logger.warning('content: %s', r.content)
+    return r.json()
 
 
-def get_user_profile(access_token):
+def get_user_profile(data):
     """
     Get Profile for Authenticated User
     """
     url = f'{settings.DISCORD_API_URL}/users/@me'
-    headers = {'Authorization': f'Bearer {access_token}'}
+    headers = {'Authorization': f"Bearer {data['access_token']}"}
     logger.debug('API CALL')
     r = requests.get(url, headers=headers, timeout=10)
     logger.debug('status_code: %s', r.status_code)
     logger.debug('content: %s', r.content)
-    user_profile = r.json()
+    p = r.json()
     return {
-        'id': user_profile['id'],
-        'username': user_profile['username'],
-        'discriminator': user_profile['discriminator'],
-        'django_username': user_profile['username'] + user_profile['discriminator'],
-        'avatar': user_profile['avatar'],
-        'access_token': access_token,
+        'id': p['id'],
+        'username': p['username'],
+        'discriminator': p['discriminator'],
+        'avatar': p['avatar'],
+        'access_token': data['access_token'],
+        'refresh_token': data['refresh_token'],
+        'expires_in': datetime.now() + timedelta(0, data['expires_in']),
     }
 
 
-def update_profile(user, user_profile):
+def update_profile(user, profile):
     """
     Update Django user profile with provided data
     """
-    user.first_name = user_profile['username']
-    user.last_name = user_profile['discriminator']
-    user.discord_username = user_profile['username']
-    user.discriminator = user_profile['discriminator']
-    user.discord_id = user_profile['id']
-    user.avatar_hash = user_profile['avatar']
-    user.access_token = user_profile['access_token']
-    return user
+    user.first_name = profile['username']
+    user.last_name = profile['discriminator']
+    user.discriminator = profile['discriminator']
+    user.avatar_hash = profile['avatar']
+    user.access_token = profile['access_token']
+    user.save()
+    return
 
 
-def post_login_actions(request, user):
-    logger.debug(user)
-
+def post_login_actions(request):
     server_list = get_user_servers(request.user.access_token)
     if isinstance(server_list, requests.models.Response):
         logger.error(server_list.content)
         messages.warning(request, 'Error getting server list from Discord API.')
-        return False
+        return
     logger.debug('server_list: %s', server_list)
     request.user.server_list = get_server_id_list(server_list)
     request.user.save()
     logger.debug('request.user.server_list: %s', request.user.server_list)
     request.session['server_list'] = server_list
-    return True
+    return
 
 
 def get_next_url(request):
