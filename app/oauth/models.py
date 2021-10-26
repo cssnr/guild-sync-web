@@ -15,7 +15,7 @@ class CustomUser(AbstractUser):
     avatar_hash = models.CharField(blank=True, max_length=32)
     access_token = models.CharField(blank=True, max_length=32)
     refresh_token = models.CharField(blank=True, max_length=32)
-    expires_in = models.DateTimeField(blank=True)
+    expires_in = models.DateTimeField(blank=True, null=True)
     access_key = models.CharField(default=random_string, max_length=32)
     server_list = models.JSONField(blank=True, null=True)
 
