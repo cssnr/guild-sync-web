@@ -5,13 +5,13 @@ from .models import CustomUser
 
 class CustomUserAdmin(UserAdmin):
     model = CustomUser
-    list_display = ('username', 'first_name', 'discriminator', 'discord_id', 'is_staff',)
-    list_filter = ('is_staff',)
+    list_display = ('username', 'first_name', 'discriminator', 'is_superuser',)
+    list_filter = ('is_superuser',)
     fieldsets = UserAdmin.fieldsets + (
-        ('OAuth', {'fields': ('discord_username', 'discriminator', 'discord_id',)}),
+        ('OAuth', {'fields': ('discriminator', 'avatar_hash', 'server_list',)}),
     )
-    readonly_fields = ('discord_username', 'discriminator', 'discord_id',)
-    search_fields = ('username', 'discord_id',)
+    readonly_fields = ('discriminator', 'avatar_hash', 'server_list',)
+    search_fields = ('first_name', 'discriminator',)
     ordering = ('username',)
 
 

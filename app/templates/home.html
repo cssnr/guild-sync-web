@@ -12,10 +12,13 @@
     <div class="row mt-2">
         <div class="col">
             <h1 class="display-4">Guild Sync Website</h1>
-            <p class="lead">Hello {% if user.first_name %}{{ user.first_name }}{% else %}{{ user.username }}{% endif %}
-                and welcome to the Discord Guild Sync website.</p>
+            <p class="lead">Hello {{ user.first_name }} and welcome to the Discord Guild Sync website.</p>
             {% if not server_list %}
-                <p>No servers that you can manage.</p>
+                <p>No servers that you can manage!</p>
+                <p>
+                    If you have recently added a new server or been promoted to an Administrator in an existing server,
+                    you can log out, then log back in to refresh this server listing
+                </p>
             {% else %}
                 <p>These are the servers you can manage:</p>
                 {% include 'include/servers.html' %}
