@@ -1,7 +1,7 @@
 import logging
 import requests
 import time
-from celery.decorators import task
+from celery import shared_task
 from django.conf import settings
 from django.core import management
 from oauth.models import CustomUser
@@ -10,12 +10,12 @@ from home.models import ServerProfile
 logger = logging.getLogger('celery')
 
 
-@task(autoretry_for=(Exception,))
+@shared_task()
 def clear_sessions():
     return management.call_command('clearsessions')
 
 
-@task()
+@shared_task()
 def process_upload(user_pk, data):
     user = CustomUser.objects.get(pk=user_pk)
     logger.info(user.server_list)

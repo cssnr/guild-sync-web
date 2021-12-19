@@ -88,9 +88,8 @@ if 'SENTRY_URL' in os.environ:
     sentry_sdk.init(
         dsn=os.environ['SENTRY_URL'],
         integrations=[DjangoIntegration()],
-        traces_sample_rate=float(os.getenv('SENTRY_SAMPLE_RATE', 1.0)),
         send_default_pii=True,
-        debug=strtobool(os.getenv('SENTRY_DEBUG', os.getenv('DEBUG', 'False'))),
+        debug=strtobool(os.getenv('SENTRY_DEBUG', False)),
     )
 
 if DEBUG:

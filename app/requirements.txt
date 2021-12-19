@@ -1,5 +1,5 @@
 celery>=5,<6
-django>=3,<4
+django==3.2.*
 django-debug-toolbar>=3,<4
 django-celery-beat
 django-extensions>=3,<4
