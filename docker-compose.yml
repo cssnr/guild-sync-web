@@ -9,14 +9,10 @@ services:
     volumes:
       - data_dir:/data
     secrets:
-      - source: cssnr.com.crt
-        target: /etc/ssl/cssnr.com.crt
-      - source: cssnr.com.key
-        target: /etc/ssl/cssnr.com.key
       - source: cssnr_basic_http_auth
         target: /etc/nginx/auth.users
     ports:
-      - "443:443"
+      - "80:80"
     depends_on:
       - app
 
@@ -70,17 +66,7 @@ services:
     volumes:
       - redis_data:/data
 
-  memcached:
-    image: memcached:alpine
-    command: "memcached -I 4M"
-    deploy:
-      replicas: 1
-
 secrets:
-  cssnr.com.crt:
-    file: /etc/ssl/cssnr.com.crt
-  cssnr.com.key:
-    file: /etc/ssl/cssnr.com.key
   cssnr_basic_http_auth:
     file: ~/basic_http_auth
 

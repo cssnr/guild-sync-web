@@ -4,16 +4,14 @@
 
 pipeline {
     agent {
-        label 'manager'
+        label 'jenkins-slave-docker'
     }
     options {
         buildDiscarder(logRotator(numToKeepStr:'5'))
         timeout(time: 1, unit: 'HOURS')
     }
     environment {
-        DEV_PORT = '10137'
-        PROD_PORT = '10138'
-        DISCORD_ID = "smashed-alerts"
+        DISCORD_ID = "discord-hook-smashed"
         COMPOSE_FILE = "docker-compose-swarm.yml"
 
         BUILD_CAUSE = getBuildCause()
@@ -47,19 +45,21 @@ pipeline {
                 }
             }
             environment {
-                ENV_FILE = "deploy-configs/services/${SERVICE_NAME}/dev.env"
-                STACK_NAME = "dev_${BASE_NAME}"
-                DOCKER_PORT = "${DEV_PORT}"
+                ENV = "dev"
+                ENV_FILE = "service-configs/services/${SERVICE_NAME}/${ENV}.env"
+                STACK_NAME = "${ENV}_${BASE_NAME}"
+                TRAEFIK_HOST = "dev.guildsync.cc"
             }
             steps {
-                echo "\n--- Starting Dev Deploy ---\n" +
+                echo "\n--- Starting ${ENV} Deploy ---\n" +
                         "STACK_NAME:    ${STACK_NAME}\n" +
-                        "DOCKER_PORT:   ${DOCKER_PORT}\n" +
+                        "TRAEFIK_HOST:  ${TRAEFIK_HOST}\n" +
                         "ENV_FILE:      ${ENV_FILE}\n"
-                sendDiscord("${DISCORD_ID}", "Dev Deploy Started")
+                sendDiscord("${DISCORD_ID}", "${ENV} Deploy Started")
+                updateCompose("${COMPOSE_FILE}", "STACK_NAME", "${STACK_NAME}")
                 stackPush("${COMPOSE_FILE}")
                 stackDeploy("${COMPOSE_FILE}", "${STACK_NAME}")
-                sendDiscord("${DISCORD_ID}", "Dev Deploy Finished")
+                sendDiscord("${DISCORD_ID}", "${ENV} Deploy Finished")
             }
         }
         stage('Prod Deploy') {
@@ -70,19 +70,21 @@ pipeline {
                 }
             }
             environment {
-                ENV_FILE = "deploy-configs/services/${SERVICE_NAME}/prod.env"
-                STACK_NAME = "prod_${BASE_NAME}"
-                DOCKER_PORT = "${PROD_PORT}"
+                ENV = "prod"
+                ENV_FILE = "service-configs/services/${SERVICE_NAME}/${ENV}.env"
+                STACK_NAME = "${ENV}_${BASE_NAME}"
+                TRAEFIK_HOST = "guildsync.cc"
             }
             steps {
-                echo "\n--- Starting Prod Deploy ---\n" +
+                echo "\n--- Starting ${ENV} Deploy ---\n" +
                         "STACK_NAME:    ${STACK_NAME}\n" +
-                        "DOCKER_PORT:   ${DOCKER_PORT}\n" +
+                        "TRAEFIK_HOST:  ${TRAEFIK_HOST}\n" +
                         "ENV_FILE:      ${ENV_FILE}\n"
-                sendDiscord("${DISCORD_ID}", "Prod Deploy Started")
+                sendDiscord("${DISCORD_ID}", "${ENV} Deploy Started")
+                updateCompose("${COMPOSE_FILE}", "STACK_NAME", "${STACK_NAME}")
                 stackPush("${COMPOSE_FILE}")
                 stackDeploy("${COMPOSE_FILE}", "${STACK_NAME}")
-                sendDiscord("${DISCORD_ID}", "Prod Deploy Finished")
+                sendDiscord("${DISCORD_ID}", "${ENV} Deploy Finished")
             }
         }
     }

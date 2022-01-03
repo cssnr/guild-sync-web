@@ -1,5 +1,4 @@
 FROM python:3.9-alpine
-ENV TZ=America/Los_Angeles
 
 RUN apk add --update --no-cache \
     alpine-sdk \
