@@ -60,13 +60,13 @@ CELERY_BEAT_SCHEDULE = {
 
 CACHES = {
     'default': {
-        'BACKEND': os.getenv('CACHE_BACKEND',
-                             'django.core.cache.backends.locmem.LocMemCache'),
-        'LOCATION': os.getenv('CACHE_LOCATION', 'localhost:11211'),
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': os.environ['CACHE_LOCATION'],
         'OPTIONS': {
-            'server_max_value_length': 1024 * 1024 * 4,
-        }
-    }
+            'PASSWORD': os.getenv('CELERY_REDIS_PASSWORD', None),
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        },
+    },
 }
 
 DATABASES = {
